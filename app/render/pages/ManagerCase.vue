@@ -6,15 +6,7 @@
         <Tree :Data="CaseList"></Tree>
       </div>
     </div>
-
-    <div class="panel panel-default container-full ManagerRightContent">
-      <div class="panel-heading">
-        <h3 class="panel-title">案件属性</h3>
-      </div>
-      <div class="panel-body">
-        
-      </div>
-    </div>
+    <router-view transition='display' transition-mode='out-in' keep-alive></router-view>
   </div>
 </template>
 <script>
@@ -27,11 +19,17 @@
     data () {
       return {
         TreeConfig: {},
-        CaseList: [{Text: 'test', Children: [{Text: 'test1'}]}],
+//        CaseList: [{Text: 'test', Children: [{Text: 'test1'}]}],
         CasePath: {Path: '', placeholder: '请选择案件路径'},
       }
     }, mounted () {
+      this.$router.push('/Home/Case/' + this.CaseList[0].Id)
     },
-    methods: {}
+    methods: {},
+    computed: {
+      CaseList () {
+        return store.getters.GetAllCase
+      }
+    }
   }
 </script>

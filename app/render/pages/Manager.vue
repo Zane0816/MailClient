@@ -6,7 +6,9 @@
           <ul class="nav navbar-nav">
             <li><a>开始</a>
               <ul class="dropdown-menu">
-                <li><a>新建案件</a></li>
+                <li>
+                  <router-link to="/Home/Case/Add">新建案件</router-link>
+                </li>
                 <li><a>退出系统</a></li>
               </ul>
             </li>

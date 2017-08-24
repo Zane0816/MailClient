@@ -7,6 +7,8 @@ import Home from './pages/Home'
 import Manager from './pages/Manager'
 import ManagerCase from './pages/ManagerCase'
 import ManagerUser from './pages/ManagerUser'
+import AddCase from './pages/AddCase'
+import CaseInfo from './pages/CaseInfo'
 
 Vue.use(VueRouter)
 Vue.config.debug = true
@@ -24,7 +26,16 @@ const routes = [{
       children: [
         {
           path: 'Case',
-          component: ManagerCase
+          component: ManagerCase,
+          children: [
+            {
+              path: 'Add',
+              component: AddCase
+            }, {
+              path: ':CaseId',
+              component: CaseInfo
+            },
+          ]
         },
         {
           path: 'User',
