@@ -1,0 +1,230 @@
+@charset "UTF-8"; /*星云文件分析系统导航*/
+
+/* css 初始化 B */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-size: 12px;
+  color: #434343;
+  font-family: Microsoft YaHei UI, Microsoft YaHei, Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, WenQuanYi Micro Hei, Arial, sans-serif;
+}
+
+/*滚动条自定义样式*/
+*::-webkit-scrollbar {
+  width: 6px;
+  background-color: #F5F5F5;
+}
+
+*::-webkit-scrollbar:horizontal {
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #F5F5F5;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #000000;
+}
+
+.LoadingBG {
+  background-color: #000000;
+  height: 100%;
+}
+
+.LoadingBG .Logo {
+  width: 899px;
+  margin: auto;
+}
+
+.LoadingBG .progress {
+  width: 545px;
+  margin: -185px auto;
+  background-color: #262626;
+}
+
+.container-full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  margin: 0;
+}
+
+#nav {
+  -webkit-app-region: drag;
+  width: 100%;
+  background-color: #2A2E31;
+  color: #ffffff;
+  height: 40px;
+  line-height: 38px;
+}
+
+#nav .rg {
+  -webkit-app-region: no-drag;
+}
+
+#nav .nav-logo {
+  background-image: url("../img/icon-banner.png");
+  display: block;
+  width: 24px;
+  height: 19px;
+  float: left;
+  margin-left: 35px;
+  margin-top: 11px;
+}
+
+#nav .nav-title {
+  margin-left: 10px;
+  vertical-align: top;
+  line-height: 40px;
+  font-size: 16px;
+}
+
+#nav-title {
+  vertical-align: top;
+  line-height: 40px;
+  font-size: 16px;
+}
+
+#nav .rg {
+  margin-right: 30px;
+  line-height: 10px;
+  float: right;
+}
+
+#nav .rg a {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.WinSmall {
+  background: url("../img/mainlogo/small.png") no-repeat 5px 15px;
+}
+
+.WinMax {
+  width: 35px;
+  background: url("../img/mainlogo/big.png") no-repeat 7px 5px;
+}
+
+.WinMax.active {
+  background: url("../img/mainlogo/dubobo.png") no-repeat 7px 5px;
+}
+
+.WinClose {
+  margin-top: 5px;
+  background: url("../img/mainlogo/copy.png") no-repeat 1px 1px;
+}
+
+.container-full.HomeContent {
+  top: 40px;
+  background-color: #eeeff2;
+}
+
+#ManagerNav {
+  min-height: 35px;
+  margin-bottom: 0;
+}
+
+#ManagerNav .navbar-nav > li:hover > a {
+  background-color: #e7e7e7;
+}
+
+#ManagerNav .navbar-nav > li:hover > .dropdown-menu {
+  display: block;
+}
+
+#ManagerNav .navbar-nav > li a {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  cursor: pointer;
+}
+
+.modal {
+  display: block
+}
+
+.modal-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+
+.modal-enter, .fade-leave-to /* .fade-leave-active in below version 2.1.8 */
+{
+  opacity: 0
+}
+
+#ManagerTab {
+  height: 30px;
+  line-height: 30px;
+}
+
+#ManagerTab {
+  background-color: #01c3cd;
+}
+
+#ManagerTab ul {
+  font-size: 0;
+}
+
+#ManagerTab ul li {
+  display: inline-block;
+  width: 125px;
+  list-style: none;
+  font-size: 16px;
+  color: #2A2E31;
+  border-right: 1px solid #01AFB8;
+  cursor: pointer;
+  text-align: center;
+}
+
+#ManagerTab ul li a {
+  display: block;
+}
+
+#ManagerTab ul li a.active {
+  box-shadow: inset 0 0 5px 1px #18acb3;
+}
+
+#ManagerTab ul li a {
+  color: #000;
+  text-decoration: none;
+}
+
+.ManagerContent {
+  top: 75px;
+  left: 30px;
+  right: 30px;
+  bottom: 30px;
+}
+
+.ManagerLeftContent {
+  width: 300px;
+}
+
+.ManagerRightContent {
+  left: 310px;
+}
+
+.AlertMsg {
+  padding: 15px;
+  position: fixed;
+  top: 100px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  max-width: 250px;
+  border-radius: 5px;
+  z-index: 99;
+}

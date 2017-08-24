@@ -1,0 +1,95 @@
+{
+  "name": "MailClientRewriteByVue",
+  "version": "0.0.1",
+  "description": "用Vue重写邮件项目",
+  "main": "http://localhost:9003/",
+  "node-main": "app/main.js",
+  "node-remote": "http://localhost:9003/",
+  "scripts": {
+    "build": "set NODE_ENV=production&& npm run build:w",
+    "build:w": "npm run build:w-x86 && npm run build:w-x64",
+    "build:w-x86": "set Arch=win32&& npm run pack && build -w --x86 ./dist",
+    "build:w-x64": "set Arch=win64&& npm run pack && build -w --x64 ./dist",
+    "test:x64": "set NODE_ENV=production&&npm run build:w-x64",
+    "dev2": "nw ",
+    "test:pack": "nw ./dist",
+    "dev": "set NODE_ENV=dev && npm run pack:main && node tasks/runner.js",
+    "pack": "npm run clean && node packe && npm run pack:main && npm run pack:renderer ",
+    "pack:main": " webpack -p --progress --colors --config webpack.main.config.js",
+    "pack:renderer": "webpack --progress --colors --config webpack.renderer.config.js",
+    "clean": "rimraf ./dist && mkdir dist",
+    "postinstall": "node rebuild.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "window": {
+    "frame": false,
+    "transparent": false,
+    "position": "center",
+    "width": 1440,
+    "height": 900,
+    "min_width": 1440,
+    "min_height": 900,
+    "icon": "app/img/logo.png"
+  },
+  "chromium-args": "--disable-web-security",
+  "webkit": {
+    "plugin": true
+  },
+  "build": {
+    "nwVersion": "0.14.7",
+    "nwFlavor": "normal",
+    "targets": [
+      "7z"
+    ],
+    "win": {
+      "icon": "app/logo.ico",
+      "versionStrings": {
+        "ProductName": "Nebula",
+        "CompanyName": "Wuhan CFLab.Net Company",
+        "LegalCopyright": "COPYRIGHT ⓒ 2016 CFLAB.NET. ALL RIGHTS RESERVED"
+      }
+    },
+    "nsis": {
+      "icon": "app/logo.ico",
+      "languages": [
+        "SimpChinese"
+      ],
+      "diffUpdaters": false
+    },
+    "strippedProperties": [
+      "build"
+    ],
+    "output": "../Release"
+  },
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "bootstrap": "^3.3.7",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.28.4",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^0.11.2",
+    "html-loader": "^0.5.0",
+    "html-webpack-plugin": "^2.30.1",
+    "nw": "^0.14.7",
+    "style-loader": "^0.18.2",
+    "tree-kill": "^1.1.0",
+    "url-loader": "^0.5.9",
+    "vue": "^2.4.2",
+    "vue-loader": "^13.0.4",
+    "vue-router": "^2.7.0",
+    "vue-template-compiler": "^2.4.2",
+    "vuex": "^2.3.1",
+    "webpack": "^3.4.1",
+    "webpack-dev-server": "^2.6.1"
+  },
+  "dependencies": {
+    "java": "^0.8.0",
+    "log4js": "^2.3.3",
+    "nsis-compat-updater": "^1.1.0"
+  }
+}
