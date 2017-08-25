@@ -1,24 +1,26 @@
 <template>
   <ul class="Tree list-group">
-    <li v-for="(item,i) in Data" class="list-group-item" :class="{active:item.Selected,disabled :item.Selectable}"
-        @click="Select(item,i)">
-      <span v-if="item.Children" class="glyphicon" :class="item.Expanded?'glyphicon-minus':'glyphicon-plus'"
-            @click="Toggle(item,i)"></span>
-      <span v-if="item.Checked" class="glyphicon"
-            :class="item.Checked?'glyphicon glyphicon-check':'glyphicon glyphicon-unchecked'"></span>
-      <span v-if="item.Icon" :class="item.Icon"></span>
-      {{item.Text}}
-      <span class="badge" v-if="item.Notes">{{item.Notes}}</span>
-      <Tree v-if="item.Children&&item.Expanded" :Data="item.Children"></Tree>
+    <li v-for="item in Data" class="list-group-item"
+        :class="{active:Options.SelectedId===item.Id,disabled :item.Selectable}"
+        @click.stop="Select(item)">
+      <p>
+        <span v-if="item.Children" class="glyphicon" :class="item.Expanded?'glyphicon-minus':'glyphicon-plus'"
+              @click.stop="Toggle(item)"></span>
+        <span v-if="item.hasOwnProperty('Checked')" class="glyphicon"
+              :class="item.Checked?'glyphicon glyphicon-check':'glyphicon glyphicon-unchecked'"
+              @click.stop="Check(item)"></span>
+        <span v-if="item.Icon" :class="item.Icon"></span>
+        {{item.Text}}
+        <span class="badge" v-if="item.Notes">{{item.Notes}}</span></p>
+      <Tree v-if="item.Children&&item.Expanded" :Data="item.Children" :Options='Options'></Tree>
     </li>
   </ul>
 </template>
 <script>
-
   export default {
     name: 'Tree',
     data () {
-      return {open: false}
+      return {}
     },
     props: {
       Data: Array,
@@ -26,27 +28,16 @@
     },
     computed: {},
     methods: {
-      Toggle (item, i) {
-        item.Expanded = !item.Expanded
-        this.Data.splice(i, 1, item)
+      Toggle (item) {
+        this.$set(item, 'Expanded', !item.Expanded)
       },
-      Select (item, i) {
+      Select (item) {
         if (!item.Selectable) {
-          this.RemoveSelected()
-          item.Selected = true
-          this.Data.splice(i, 1, item)
+          this.$set(this.Options, 'SelectedId', item.Id)
+          this.Options.Click(this, item)
         }
-      },
-      RemoveSelected () {
-        this.Data.forEach((d) => {
-          console.log(d)
-          delete d.Selected
-          if(d.Children){
-            d.Children.forEach((dc)=>{
-              delete dc.Selected
-            })
-          }
-        })
+      }, Check (item) {
+        this.$set(item, 'Checked', !item.Checked)
       }
     }
   }

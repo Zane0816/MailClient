@@ -9,4 +9,14 @@
   </div>
 </template>
 <script>
+
+  import state from '../vuex'
+
+  export default {
+    computed: {
+      CurrentCase () {
+        return state.getters.GetCurrentCase
+      }
+    }
+  }
 </script>

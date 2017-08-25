@@ -32,7 +32,7 @@ const routes = [{
               path: 'Add',
               component: AddCase
             }, {
-              path: ':CaseId',
+              path: '/',
               component: CaseInfo
             },
           ]

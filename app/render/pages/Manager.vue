@@ -40,6 +40,13 @@
     <router-view transition='display' transition-mode='out-in' keep-alive></router-view>
     <Modal :Options="AboutConfig">
       <h4 slot="header">关于我们</h4>
+      <div slot="body">
+        <h1>这是一个用nw.js+vue.js写的应用</h1>
+        <h2>至于有什么用</h2>
+        <h3>暂时还没有吧</h3>
+        <h4>只是想用这俩个技术</h4>
+        <h5>写个东西</h5>
+      </div>
     </Modal>
   </div>
 </template>
@@ -50,7 +57,7 @@
     components: {Modal},
     data () {
       return {
-        AboutConfig: {Show: true, Size: 1},
+        AboutConfig: {Show: true, Size: 1,NoFooter:true},
         IsLogged: false
       }
     },
