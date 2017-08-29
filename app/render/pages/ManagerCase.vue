@@ -20,20 +20,34 @@
       return {
         TreeConfig: {
           Click ($this, item) {
-//            $this.$router.push('/Home/Case/' + item.Id)
+            if ($this.$route.path !== '/Home/Case' && item.Type === 'Case') {
+              $this.$router.push({path: '/Home/Case', query: {Id: item.Id}})
+            }
+            if ($this.$route.path !== '/Home/Case/Evidence' && item.Type === 'Evidence') {
+              $this.$router.push('/Home/Case/Evidence')
+            }
             store.dispatch('SetCurrentCase', item)
-          }
+          },
         },
         CasePath: {Path: '', placeholder: '请选择案件路径'},
       }
     }, mounted () {
-//      this.$router.push('/Home/Case/' + this.CaseList[0].Id)
+      if (!this.TreeConfig.SelectedId)
+        this.$set(this.TreeConfig, 'SelectedId', this.CaseList[0].Id)
+
     },
     methods: {},
     computed: {
       CaseList () {
         return store.getters.GetAllCase
       }
-    }
+    },
+    beforeRouteUpdate (to, from, next) {
+      if (to.path === '/Home/Case' && !to.query.Id) {
+        this.$set(this.TreeConfig, 'SelectedId', this.CaseList[0].Id)
+        store.dispatch('SetCurrentCase', this.CaseList[0])
+      }
+      next()
+    },
   }
 </script>

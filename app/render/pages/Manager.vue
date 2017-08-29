@@ -64,7 +64,7 @@
     methods: {
       ShowAbout () {
         this.AboutConfig.Show = !this.AboutConfig.Show
-      }
+      },
     },
     mounted () {
       this.$router.push('/Home/Case')

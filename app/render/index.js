@@ -9,6 +9,7 @@ import ManagerCase from './pages/ManagerCase'
 import ManagerUser from './pages/ManagerUser'
 import AddCase from './pages/AddCase'
 import CaseInfo from './pages/CaseInfo'
+import EvidenceInfo from './pages/EvidenceInfo'
 
 Vue.use(VueRouter)
 Vue.config.debug = true
@@ -34,6 +35,9 @@ const routes = [{
             }, {
               path: '/',
               component: CaseInfo
+            },{
+              path: 'Evidence',
+              component: EvidenceInfo
             },
           ]
         },
