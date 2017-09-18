@@ -10,6 +10,7 @@ import ManagerUser from './pages/ManagerUser'
 import AddCase from './pages/AddCase'
 import CaseInfo from './pages/CaseInfo'
 import EvidenceInfo from './pages/EvidenceInfo'
+import AddEvidence from './pages/AddEvidence'
 
 Vue.use(VueRouter)
 Vue.config.debug = true
@@ -35,9 +36,12 @@ const routes = [{
             }, {
               path: '/',
               component: CaseInfo
-            },{
+            }, {
               path: 'Evidence',
               component: EvidenceInfo
+            }, {
+              path: 'AddEvidence',
+              component: AddEvidence
             },
           ]
         },
@@ -58,10 +62,6 @@ const routes = [{
 }]
 
 const Router = new VueRouter({routes})
-
-// Vue.directive('ChooseDirectory', (el, binding) => {
-//   el.onclick = () => {}
-// })
 
 new Vue({el: '#app', router: Router, render: h => h(App)})
 

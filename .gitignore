@@ -1,11 +1,11 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
 node_modules/
-/logs/
-/dist/
+logs/
+dist/
 jre/
 Release/
-/app/main.js
-/app/data/*
-/PackResource
-/Java/
+app/main.js
+app/data/*
+PackResource
+Java/

@@ -15,7 +15,6 @@
   </div>
 </template>
 <script>
-  import store from '../vuex/index'
   import AlertMsg from '../components/AlertMsg'
 
   const win = nw.Window.get()
@@ -42,7 +41,8 @@
         } else {
           win.maximize()
         }
-      }
+      },
+
     },
     mounted () {
       win.removeAllListeners('maximize')

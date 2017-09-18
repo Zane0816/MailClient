@@ -3,7 +3,7 @@
     <div class="panel-heading">
       <h3 class="panel-title">案件属性</h3>
       <div class="Tool">
-        <button type="submit" class="btn btn-default">添加证据</button>
+        <router-link to="/Home/Case/AddEvidence" class="btn btn-default">添加证据</router-link>
         <button type="submit" class="btn btn-default">案件报告</button>
         <button type="submit" class="btn btn-primary">进入案件</button>
       </div>

@@ -4,11 +4,17 @@
       <h3 class="panel-title">新建案件</h3>
     </div>
     <div class="panel-body">
-      <form class="form-horizontal" @submit="AddCase">
+      <form class="form-horizontal" @submit="AddEvidence">
         <div class="form-group">
           <label for="CaseName" class="col-sm-2 control-label">案件名:</label>
           <div class="col-sm-10">
-            <input class="form-control" id="CaseName" placeholder="案件名" v-model="Case.Text">
+            <input class="form-control" id="CaseName" placeholder="案件名" v-model="Case.Text" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="EvidenceName" class="col-sm-2 control-label">证据名:</label>
+          <div class="col-sm-10">
+            <input class="form-control" id="EvidenceName" placeholder="证据名" v-model="Case.Text">
           </div>
         </div>
         <div class="form-group">
@@ -18,25 +24,20 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="CaseDataDir" class="col-sm-2 control-label">案件数据目录:</label>
+          <label for="EvidenceType" class="col-sm-2 control-label">证据类型:</label>
           <div class="col-sm-10">
-            <div class="input-group">
-              <input class="form-control" id="CaseDataDir" placeholder="案件数据目录" v-model="Case.CaseDataDir" readonly>
-              <div class="input-group-btn">
-                <button class="btn btn-default" type="button" @click="Choose('CaseDataDir')">
-                  <span class="glyphicon glyphicon-search"></span></button>
-              </div>
-            </div>
+            <select class="form-control" id="EvidenceType" v-model="Case.Creator">
+              <option value="file">文件</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
-          <label for="CompositeFilesDir" class="col-sm-2 control-label">复合文件目录:</label>
+          <label for="EvidenceDir" class="col-sm-2 control-label">证据目录:</label>
           <div class="col-sm-10">
             <div class="input-group">
-              <input class="form-control" id="CompositeFilesDir" placeholder="案件数据目录" v-model="Case.CompositeFilesDir"
-                     readonly>
+              <input class="form-control" id="EvidenceDir" placeholder="案件数据目录" v-model="Case.EvidenceDir" readonly>
               <div class="input-group-btn">
-                <button class="btn btn-default" type="button" @click="Choose('CaseDataDir')">
+                <button class="btn btn-default" type="button" @click="Choose('EvidenceDir')">
                   <span class="glyphicon glyphicon-search"></span></button>
               </div>
             </div>
@@ -69,7 +70,7 @@
       }
     },
     methods: {
-      AddCase () {
+      AddEvidence () {
         state.dispatch('AddCase', this.Case)
         this.$router.push('/Home/Case')
       },
