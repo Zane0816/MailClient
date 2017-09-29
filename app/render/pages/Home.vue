@@ -15,9 +15,10 @@
   </div>
 </template>
 <script>
+  import { remote } from 'electron'
   import AlertMsg from '../components/AlertMsg'
 
-  const win = nw.Window.get()
+  const Win = remote.getCurrentWindow()
   export default {
     components: {AlertMsg},
     data () {
@@ -27,30 +28,25 @@
     },
     methods: {
       WinClose () {
-        win.close()
-        if (win.appWindow.id === '') {
-          nw.App.quit()
-        }
+        Win.close()
       },
       WinSmall () {
-        win.minimize()
+        Win.minimize()
       },
       WinMax () {
         if (this.IsMax) {
-          win.restore()
+          Win.restore()
         } else {
-          win.maximize()
+          Win.maximize()
         }
       },
 
     },
     mounted () {
-      win.removeAllListeners('maximize')
-      win.removeAllListeners('restore')
-      win.on('maximize', () => {
+      Win.on('maximize', () => {
         this.IsMax = true
       })
-      win.on('restore', () => {
+      Win.on('unmaximize', () => {
         this.IsMax = false
       })
     }

@@ -42,7 +42,7 @@ let mainConfig = {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"'
+      'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`
     }),
     new UglifyJsPlugin({
       beautify: false,
@@ -63,7 +63,7 @@ let mainConfig = {
       path.join(__dirname, 'node_modules')
     ]
   },
-  target: 'node-webkit'
+  target: 'electron-main'
 }
 if (process.env.NODE_ENV === 'production') {
   mainConfig.plugins.push(new CopyWebpackPlugin([

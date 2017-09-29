@@ -33,8 +33,8 @@ function run (command, color, name) {
      * (prevents electron from opening a blank window that requires refreshing)
      */
     if (/Compiled/g.test(data.toString().trim().replace(/\n/g, '\n' + repeat(' ', command.length + 2))) && !isElectronOpen) {
-      console.log(`${BLUE}Starting NW.js...\n${END}`)
-      run('nw .', BLUE, 'NW.js')
+      console.log(`${BLUE}Starting electron...\n${END}`)
+      run('electron .', BLUE, 'electron')
       isElectronOpen = true
     }
   })

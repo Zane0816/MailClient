@@ -2,9 +2,7 @@
   "name": "MailClientRewriteByVue",
   "version": "0.0.1",
   "description": "用Vue重写邮件项目",
-  "main": "http://localhost:9003/",
-  "node-main": "app/main.js",
-  "node-remote": "http://localhost:9003/",
+  "main": "app/main.js",
   "scripts": {
     "build": "set NODE_ENV=production&& npm run build:w",
     "build:w": "npm run build:w-x86 && npm run build:w-x64",
@@ -36,32 +34,6 @@
   "webkit": {
     "plugin": true
   },
-  "build": {
-    "nwVersion": "0.14.7",
-    "nwFlavor": "normal",
-    "targets": [
-      "7z"
-    ],
-    "win": {
-      "icon": "app/logo.ico",
-      "versionStrings": {
-        "ProductName": "Nebula",
-        "CompanyName": "Wuhan CFLab.Net Company",
-        "LegalCopyright": "COPYRIGHT ⓒ 2016 CFLAB.NET. ALL RIGHTS RESERVED"
-      }
-    },
-    "nsis": {
-      "icon": "app/logo.ico",
-      "languages": [
-        "SimpChinese"
-      ],
-      "diffUpdaters": false
-    },
-    "strippedProperties": [
-      "build"
-    ],
-    "output": "../Release"
-  },
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
@@ -71,11 +43,11 @@
     "bootstrap": "^3.3.7",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.4",
+    "electron": "^1.7.8",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "html-loader": "^0.5.0",
     "html-webpack-plugin": "^2.30.1",
-    "nw": "^0.14.7",
     "style-loader": "^0.18.2",
     "tree-kill": "^1.1.0",
     "url-loader": "^0.5.9",

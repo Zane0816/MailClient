@@ -4,12 +4,15 @@
 
 import { dirname } from 'path'
 import { EventEmitter } from 'events'
+import { exec } from 'child_process'
+import { app, BrowserWindow } from 'electron'
 import Common from './Common'
 import JavaMethod from './ConnectJava'
 import AutoUpdate from './AutoUpdate'
 import LogHelper from './LogHelper'
-import { exec } from 'child_process'
 
+let MainWindow = null
+const WinUrl = process.env.NODE_ENV === 'production' ? `file://${__dirname}/index.html` : `http://localhost:9003`
 const File = {
   /**
    * 复制文件
@@ -36,8 +39,24 @@ const File = {
   }
 }
 
-const $Class = {
-  File: File, Java: JavaMethod, Updater: AutoUpdate
+function CreateWindow () {
+  MainWindow = new BrowserWindow({width: 1440, height: 900, minWidth: 1440, minHeight: 900, frame: false,})
+  MainWindow.loadURL(WinUrl)
+  MainWindow.on('closed', () => {
+    MainWindow = null
+  })
+  if (process.env.NODE_ENV !== 'production') MainWindow.webContents.openDevTools()
 }
-$Class.__proto__ = EventEmitter.prototype
-global.Main = $Class
+
+app.on('ready', CreateWindow)
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  if (MainWindow === null) {
+    CreateWindow()
+  }
+})

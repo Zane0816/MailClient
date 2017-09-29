@@ -119,7 +119,7 @@ let rendererConfig = {
       path.join(__dirname, 'node_modules')
     ]
   },
-  target: 'web'
+  target: 'electron-renderer'
 }
 
 if (process.env.NODE_ENV !== 'production') {
