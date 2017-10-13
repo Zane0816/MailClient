@@ -5,7 +5,6 @@ import path from 'path'
 import fs from 'fs'
 import LogHelper from './LogHelper'
 import { EventEmitter } from 'events'
-// import Error from '../ErrorMessage.json'
 import Common from './Common'
 
 let ee = new EventEmitter()//声明事件发生器
@@ -200,7 +199,7 @@ const $this = {
     /**
      * 取消案件共享
      * @param {String}NetCaseId 共享案件Id
-     * @param {Arry}UserId 共享用户Id
+     * @param {Array}UserId 共享用户Id
      * @param {Function}CallBack 回调函数
      */
     CancelShare: (NetCaseId, UserId, CallBack) => {
@@ -331,7 +330,7 @@ const $this = {
      * @param {String}Path 网络案件保存路径
      * @param {Function}CallBack 回调函数
      */
-    UploadCase(LocalCaseId, Path, CallBack) {
+    UploadCase (LocalCaseId, Path, CallBack) {
       WaitingFuncAndDo('NetCaseTool', 'uploadCase', [LocalCaseId, Path, CallBack])
     },
     /**
@@ -970,9 +969,9 @@ const $this = {
     GetShipData: (Param, Type, Filter, CallBack) => {
       let cb = (MSG) => {
         if (MSG.State) {
-          let Path = path.resolve(global.__dirname, 'app/data/relationship.json')
+          let Path = path.resolve(__dirname, 'app/data/relationship.json')
           Common.CheckAndCreatePath(path.dirname(Path))
-          fs.writeFile(path.join(global.__dirname, 'app/data/relationship.json'), MSG.Data, (err, re) => {
+          fs.writeFile(path.join(__dirname, 'app/data/relationship.json'), MSG.Data, (err) => {
             if (err) {
               LogHelper.writeErr(err)
               MSG.State = false

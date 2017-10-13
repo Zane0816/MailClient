@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import * as actions from './actions'
+import actions from './actions'
 import Message from './modules/Message'
 import Case from './modules/Case'
 
