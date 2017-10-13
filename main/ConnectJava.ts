@@ -7,8 +7,8 @@ import LogHelper from './LogHelper'
 import { EventEmitter } from 'events'
 import Common from './Common'
 
-let ee = new EventEmitter()//声明事件发生器
-let java, StaticInfo//声明java 对象和静态类
+let ee = new EventEmitter();//声明事件发生器
+let java, StaticInfo;//声明java 对象和静态类
 let JavaClass = {
   LocalCaseTool: null,
   MarkTool: null,
@@ -23,7 +23,7 @@ let JavaClass = {
   PhoneTool: null,
   CheckTime: null,
   ClassTool: null,
-}//声明java包
+};//声明java包
 
 const $this = {
   /**
@@ -32,7 +32,7 @@ const $this = {
    */
   OnStarted: (CallBack) => {
     ee.on('Started', () => {
-      CallBack()
+      CallBack();
       WaitingStart()
     })
   },
@@ -80,12 +80,12 @@ const $this = {
      * @param CallBack 回调函数
      */
     AddEvidence: (CaseId, Evidence, Creator, Path, Description, EvidentType, CallBack) => {
-      let Timer
+      let Timer;
 
       function GetProgress () {
         if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar)
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total})
+          let Progress = JSON.parse(StaticInfo.progressBar);
+          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
           if (Progress.proNum === Progress.tatal) {
             clearTimeout(Timer)
           }
@@ -93,12 +93,12 @@ const $this = {
         Timer = setTimeout(GetProgress, 500)
       }
 
-      GetProgress()
+      GetProgress();
 
       let cb = (Result) => {
-        clearTimeout(Timer)//清除定时器
+        clearTimeout(Timer);//清除定时器
         CallBack(Result)
-      }
+      };
       WaitingFuncAndDo('LocalCaseTool', 'addEvidence', [CaseId, Evidence, Creator, JSON.stringify(Path), Description, EvidentType, cb])
     },
     /**
@@ -339,12 +339,12 @@ const $this = {
      * @param {Function}CallBack 回调函数
      */
     UploadAllEvidences (LocalCaseId, CallBack) {
-      let Timer
+      let Timer;
 
       function GetProgress () {
         if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar)
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total})
+          let Progress = JSON.parse(StaticInfo.progressBar);
+          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
           if (Progress.proNum === Progress.tatal) {
             clearTimeout(Timer)
           }
@@ -352,11 +352,11 @@ const $this = {
         Timer = setTimeout(GetProgress, 500)
       }
 
-      GetProgress()
+      GetProgress();
       let cb = (Result) => {
-        clearTimeout(Timer)//清除定时器
+        clearTimeout(Timer);//清除定时器
         CallBack(Result)
-      }
+      };
       WaitingFuncAndDo('NetCaseTool', 'uploadAllEvidences', [LocalCaseId, cb])
     },
     /**
@@ -366,12 +366,12 @@ const $this = {
      * @param {Function}CallBack 回调函数
      */
     UploadEvidences (Evidences, NetCaseId, CallBack) {
-      let Timer
+      let Timer;
 
       function GetProgress () {
         if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar)
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total})
+          let Progress = JSON.parse(StaticInfo.progressBar);
+          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
           if (Progress.proNum === Progress.tatal) {
             clearTimeout(Timer)
           }
@@ -379,11 +379,11 @@ const $this = {
         Timer = setTimeout(GetProgress, 500)
       }
 
-      GetProgress()
+      GetProgress();
       let cb = (Result) => {
-        clearTimeout(Timer)//清除定时器
+        clearTimeout(Timer);//清除定时器
         CallBack(Result)
-      }
+      };
       WaitingFuncAndDo('NetCaseTool', 'uploadEvidences', [JSON.stringify(Evidences), NetCaseId, cb])
     },
     /**
@@ -418,12 +418,12 @@ const $this = {
      * @param {Function}CallBack 回调函数
      */
     DownloadNetCase (NetCaseId, CasePath, CallBack) {
-      let Timer
+      let Timer;
 
       function GetProgress () {
         if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar)
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total})
+          let Progress = JSON.parse(StaticInfo.progressBar);
+          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
           if (Progress.proNum === Progress.tatal) {
             clearTimeout(Timer)
           }
@@ -431,12 +431,12 @@ const $this = {
         Timer = setTimeout(GetProgress, 500)
       }
 
-      GetProgress()
+      GetProgress();
 
       let cb = (Result) => {
-        clearTimeout(Timer)
+        clearTimeout(Timer);
         CallBack(Result)
-      }
+      };
 
       WaitingFuncAndDo('NetCaseTool', 'downloadCase', [NetCaseId, CasePath, cb])
     },
@@ -447,12 +447,12 @@ const $this = {
      * @param {Function}CallBack 回调函数
      */
     DownloadNetCaseEvidence (NetCaseId, EvidenceId, CallBack) {
-      let Timer
+      let Timer;
 
       function GetProgress () {
         if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar)
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total})
+          let Progress = JSON.parse(StaticInfo.progressBar);
+          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
           if (Progress.proNum === Progress.tatal) {
             clearTimeout(Timer)
           }
@@ -460,12 +460,12 @@ const $this = {
         Timer = setTimeout(GetProgress, 500)
       }
 
-      GetProgress()
+      GetProgress();
 
       let cb = (Result) => {
-        clearTimeout(Timer)
+        clearTimeout(Timer);
         CallBack(Result)
-      }
+      };
       WaitingFuncAndDo('NetCaseTool', 'downloadEvidence', [NetCaseId, EvidenceId, cb])
     },
     /**
@@ -969,13 +969,13 @@ const $this = {
     GetShipData: (Param, Type, Filter, CallBack) => {
       let cb = (MSG) => {
         if (MSG.State) {
-          let Path = path.resolve(__dirname, 'app/data/relationship.json')
-          Common.CheckAndCreatePath(path.dirname(Path))
+          let Path = path.resolve(__dirname, 'app/data/relationship.json');
+          Common.CheckAndCreatePath(path.dirname(Path));
           fs.writeFile(path.join(__dirname, 'app/data/relationship.json'), MSG.Data, (err) => {
             if (err) {
-              LogHelper.writeErr(err)
-              MSG.State = false
-              MSG.Msg = 'Write Data To JSON Error'
+              LogHelper.writeErr(err);
+              MSG.State = false;
+              MSG.Msg = 'Write Data To JSON Error';
               CallBack(MSG)
             } else {
               CallBack(MSG)
@@ -984,7 +984,7 @@ const $this = {
         } else {
           CallBack(MSG)
         }
-      }
+      };
       WaitingFuncAndDo('RelationShip', 'reShip', [JSON.stringify(Param), Type, JSON.stringify(Filter), cb])
     },
     /**
@@ -1178,39 +1178,39 @@ const $this = {
       WaitingFuncAndDo('ClassTool', 'getChildrenList', [ClassId, CallBack])
     }
   }
-}
+};
 
-let Started = false
+let Started = false;
 
 /**
  * 初始化Java
  */
 function Init () {
   try {
-    java.classpath.push(path.resolve(__dirname, '../Java/FileAnalysis.jar'))//引用jar包
+    java.classpath.push(path.resolve(__dirname, '../Java/FileAnalysis.jar'));//引用jar包
     StaticInfo = java.import('Static.StaticInfo')//引用静态类
   } catch (e) {
-    LogHelper.writeErr(e)
+    LogHelper.writeErr(e);
     ee.emit('Error', {State: 'err', Msg: Error['-3']})
   }
 
   java.newInstance('tool.Start', (err, Start) => {//实例化Start类
     if (err) {
-      LogHelper.writeErr(err)
+      LogHelper.writeErr(err);
       ee.emit('Error', {State: 'err', Msg: Error['-1']})
     } else {
       Start.start((err) => {//初始化程序
         if (err) {
-          LogHelper.writeErr(err)
+          LogHelper.writeErr(err);
           ee.emit('Error', {State: 'err', Msg: Error['-2']})
         } else {
-          LogHelper.writeInfo('Application Init')
-          Started = true
+          LogHelper.writeInfo('Application Init');
+          Started = true;
           ee.emit('Started')
         }
       })
     }
-  })
+  });
   ee.on('Started', () => {
     WaitingStart()
   })
@@ -1223,10 +1223,10 @@ function WaitingStart () {
   for (let Class in JavaClass) {//遍历需要实例化的Java类
     java.newInstance('tool.' + Class, (err, NewClass) => {//实例化Java类
       if (err) {//实例化错误
-        LogHelper.writeErr(err)
+        LogHelper.writeErr(err);
         ee.emit('Error', {State: 'err', Msg: 'Init Class:' + Class + ' Error'})
       } else {
-        JavaClass[Class] = NewClass
+        JavaClass[Class] = NewClass;
         ee.emit('Init' + Class)
       }
     })
@@ -1237,20 +1237,20 @@ function WaitingStart () {
  * 检测Jre环境是否存在
  */
 function CheckedJre () {
-  LogHelper.writeInfo('Checking Jre')
+  LogHelper.writeInfo('Checking Jre');
 
   let dll, dylib, so, soFiles, binary, home = __dirname,
     jvmPathx86 = path.resolve(__dirname, '../jre/bin/client/jvm.dll'),
-    jvmPathx64 = path.resolve(__dirname, '../jre/bin/server/jvm.dll')
-  dll = fs.existsSync(jvmPathx86) ? jvmPathx86 : jvmPathx64
+    jvmPathx64 = path.resolve(__dirname, '../jre/bin/server/jvm.dll');
+  dll = fs.existsSync(jvmPathx86) ? jvmPathx86 : jvmPathx64;
 
-  binary = dll || dylib || so
+  binary = dll || dylib || so;
 
-  let jvm_dll_path = path.resolve(__dirname, '../node_modules/java/build/jvm_dll_path.json')
-  let jvmPath = binary ? JSON.stringify(path.delimiter + path.dirname(path.resolve(home, binary))) : '""'
+  let jvm_dll_path = path.resolve(__dirname, '../node_modules/java/build/jvm_dll_path.json');
+  let jvmPath = binary ? JSON.stringify(path.delimiter + path.dirname(path.resolve(home, binary))) : '""';
   if (fs.existsSync(jvm_dll_path)) {
     fs.readFile(jvm_dll_path, (err, text) => {
-      if (err) LogHelper.writeErr(err)
+      if (err) LogHelper.writeErr(err);
       if (text.toString() === jvmPath) {
         ImportJava()
       } else {
@@ -1265,7 +1265,7 @@ function CheckedJre () {
    * 写入Jvm路径
    */
   function WriteJvmPath () {
-    LogHelper.writeInfo('WriteJvmPath')
+    LogHelper.writeInfo('WriteJvmPath');
     fs.writeFile(jvm_dll_path, jvmPath, (err) => {
       if (!err) {ImportJava()} else {
         LogHelper.writeErr(err)
@@ -1277,9 +1277,9 @@ function CheckedJre () {
    * 导入java
    */
   function ImportJava () {
-    LogHelper.writeInfo('ImportJava')
+    LogHelper.writeInfo('ImportJava');
     import('java').then((module) => {
-      java = module
+      java = module;
       Init()
     }).catch((err) => {
       LogHelper.writeErr(err)
@@ -1305,10 +1305,10 @@ function WaitingFuncAndDo (ClassName, FuncName, Args) {
 
   function DoFunc () {
     if (typeof FuncName === 'string') {//如果为调用方法名,则执行统一回调函数
-      let CallBack = Args[Args.length - 1]
+      let CallBack = Args[Args.length - 1];
       Args[Args.length - 1] = (err, Msg) => {
         CallBackDone(err, Msg, FuncName, CallBack)
-      }
+      };
       JavaClass[ClassName][FuncName](...Args)
     } else {//如果不是则执行回调函数
       FuncName()
@@ -1321,26 +1321,26 @@ function WaitingFuncAndDo (ClassName, FuncName, Args) {
  */
 function CallBackDone (err, Msg, FuncName, CallBack) {
   if (err) {//调用失败
-    LogHelper.writeErr(err)
-    ee.emit('Error', {State: false, Msg: 'Call Method:' + FuncName + ' Error'})
+    LogHelper.writeErr(err);
+    ee.emit('Error', {State: false, Msg: 'Call Method:' + FuncName + ' Error'});
     CallBack({State: false, Msg: 'Call Method:' + FuncName + ' Error'})
   } else {//调用成功
-    let Res
+    let Res;
     try {
       Res = JSON.parse(Msg)//解析消息体
     } catch (err) {
-      LogHelper.writeErr(err)
-      ee.emit('Error', {State: false, Msg: '无法解析数据:' + Msg})
+      LogHelper.writeErr(err);
+      ee.emit('Error', {State: false, Msg: '无法解析数据:' + Msg});
       CallBack({State: false, Msg: '无法解析数据:' + Msg})
     }
     if (Res.State) {//成功消息
       CallBack({State: true, Msg: Res.Msg, Data: Res.Data})
     } else {//错误消息
-      ee.emit('Error', {State: false, Msg: Res.Msg})
+      ee.emit('Error', {State: false, Msg: Res.Msg});
       CallBack({State: false, Msg: Res.Msg})
     }
   }
 }
 
-CheckedJre()
+CheckedJre();
 export default $this
