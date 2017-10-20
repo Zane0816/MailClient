@@ -7,19 +7,19 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 let mainConfig = {
   entry: {
-    main: path.join(__dirname, 'main/index.js')
+    main: path.join(__dirname, 'main/index.ts')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   loader: 'babel-loader',
-      //   exclude: /node_modules/,
-      //   options: {
-      //     presets: ['es2015']
-      //   }
-      // },
+      {
+        test: /\.ts$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        // options: {
+        //   presets: ['es2015']
+        // }
+      },
       {
         test: /\.json$/,
         loader: 'json-loader'

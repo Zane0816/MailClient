@@ -35,7 +35,7 @@
       },
       WinMax () {
         if (this.IsMax) {
-          Win.restore()
+          Win.unmaximize()
         } else {
           Win.maximize()
         }

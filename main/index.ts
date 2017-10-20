@@ -2,14 +2,14 @@
  * Created by admin on 2017/3/27.
  */
 
-import {dirname} from 'path'
-import {EventEmitter} from 'events'
-import {exec} from 'child_process'
-import {app, BrowserWindow} from 'electron'
-import Common from './Common'
-import JavaMethod from './ConnectJava'
-import AutoUpdate from './AutoUpdate'
-import LogHelper from './LogHelper'
+import {dirname} from 'path';
+// import {EventEmitter} from 'events'
+import {exec} from 'child_process';
+import {app, BrowserWindow, ipcMain} from 'electron';
+import Common from './Common';
+import JavaMethod from './ConnectJava';
+// import AutoUpdate from './AutoUpdate'
+import LogHelper from './LogHelper';
 
 let MainWindow = null;
 const WinUrl = process.env.NODE_ENV === 'production' ? `file://${__dirname}/index.html` : `http://localhost:9003`;
@@ -60,3 +60,8 @@ app.on('activate', () => {
         CreateWindow()
     }
 });
+declare const global: { services: Object }
+global.services = {File: File, Java: new JavaMethod()}
+//
+// ipcMain.on('', () => {
+// })

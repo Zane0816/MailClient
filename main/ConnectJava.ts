@@ -1,54 +1,22 @@
 /**
  * Created by admin on 2017/3/27.
  */
-import path from 'path'
-import fs from 'fs'
+
+
+'use strict';
 import LogHelper from './LogHelper'
-import { EventEmitter } from 'events'
+import {EventEmitter} from 'events'
 import Common from './Common'
+import {delimiter, dirname, join, resolve} from "path";
+import {existsSync, readFile, writeFile} from "fs";
 
-let ee = new EventEmitter();//声明事件发生器
-let java, StaticInfo;//声明java 对象和静态类
-let JavaClass = {
-  LocalCaseTool: null,
-  MarkTool: null,
-  NetMarkTool: null,
-  PathTool: null,
-  SearchTool: null,
-  RoleTool: null,
-  UserTool: null,
-  NetCaseTool: null,
-  ExportFileHtml: null,
-  RelationShip: null,
-  PhoneTool: null,
-  CheckTime: null,
-  ClassTool: null,
-};//声明java包
+const ee = new EventEmitter();//声明事件发生器
+let java, StaticInfo, JavaClass = {};//声明java 对象和静态类声明java包
 
-const $this = {
-  /**
-   * Java初始化完成
-   * @param CallBack 回调函数
-   */
-  OnStarted: (CallBack) => {
-    ee.on('Started', () => {
-      CallBack();
-      WaitingStart()
-    })
-  },
-  /**
-   * 发生错误
-   * @param CallBack
-   */
-  OnError: (CallBack) => {
-    ee.on('Error', (err) => {
-      CallBack(err)
-    })
-  },
-  /**
-   * 案件类
-   */
-  Case: {
+class Case {
+    constructor() {
+    }
+
     /**
      * 添加案件
      * @param CaseName 案件名
@@ -57,18 +25,18 @@ const $this = {
      * @param TempPath 缓存路径
      * @param Description 案件描述
      * @param EvidencePaths 证据列表
-     * @param CallBack 回调函数
      */
-    AddCase: (CaseName, Creator, CasePath, TempPath, Description, EvidencePaths, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'addCase', [CaseName, Creator, CasePath, TempPath, Description, JSON.stringify(EvidencePaths), CallBack])
-    },
+    async AddCase(CaseName, Creator, CasePath, TempPath, Description, EvidencePaths) {
+        await WaitingFuncAndDo('LocalCaseTool', 'addCase', [CaseName, Creator, CasePath, TempPath, Description, JSON.stringify(EvidencePaths)])
+    }
+
     /**
      * 获取案件列表
-     * @param CallBack 回调函数
      */
-    GetCaseList: (CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getCaseList', [CallBack])
-    },
+    async GetCaseList() {
+        await WaitingFuncAndDo('LocalCaseTool', 'getCaseList')
+    }
+
     /**
      * 添加证据
      * @param CaseId 案件名称
@@ -79,44 +47,47 @@ const $this = {
      * @param EvidentType 证件类型
      * @param CallBack 回调函数
      */
-    AddEvidence: (CaseId, Evidence, Creator, Path, Description, EvidentType, CallBack) => {
-      let Timer;
+    AddEvidence(CaseId, Evidence, Creator, Path, Description, EvidentType, CallBack) {
+        let Timer;
 
-      function GetProgress () {
-        if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar);
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
-          if (Progress.proNum === Progress.tatal) {
-            clearTimeout(Timer)
-          }
+        function GetProgress() {
+            if (StaticInfo.progressBar) {
+                let Progress = JSON.parse(StaticInfo.progressBar);
+                CallBack({
+                        State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total
+                    }
+                );
+                if (Progress.proNum === Progress.tatal) {
+                    clearTimeout(Timer)
+                }
+            }
+            Timer = setTimeout(GetProgress, 500)
         }
-        Timer = setTimeout(GetProgress, 500)
-      }
 
-      GetProgress();
+        GetProgress();
+        let cb = (Result) => {
+            clearTimeout(Timer);//清除定时器
+            CallBack(Result)
+        };
+        WaitingFuncAndDo('LocalCaseTool', 'addEvidence', [CaseId, Evidence, Creator, JSON.stringify(Path), Description, EvidentType, cb])
+    }
 
-      let cb = (Result) => {
-        clearTimeout(Timer);//清除定时器
-        CallBack(Result)
-      };
-      WaitingFuncAndDo('LocalCaseTool', 'addEvidence', [CaseId, Evidence, Creator, JSON.stringify(Path), Description, EvidentType, cb])
-    },
     /**
      * 打开案件
      * @param {String} CaseId 案件Id
      * @param {Array} Type 证据类型
-     * @param {Function} CallBack 回调函数
      */
-    OpenCase: (CaseId, Type, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'openCase', [CaseId, JSON.stringify(Type), CallBack])
-    },
+    async OpenCase(CaseId, Type) {
+        await   WaitingFuncAndDo('LocalCaseTool', 'openCase', [CaseId, JSON.stringify(Type)])
+    }
+
     /**
      * 暂停解析
-     * @param CallBack
      */
-    StopProcess: (CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'stopProcess', [CallBack])
-    },
+    async StopProcess() {
+        await WaitingFuncAndDo('LocalCaseTool', 'stopProcess')
+    }
+
     /**
      * 打开多个证据
      * @param {Array} EvidencePaths 证件路径
@@ -132,679 +103,680 @@ const $this = {
     /**
      * 设置默认缓存目录
      * @param Path 路径
-     * @param CallBack 回调函数
      */
-    SetTempPath: (Path, CallBack) => {
-      WaitingFuncAndDo('PathTool', 'setTempPath', [Path, CallBack])
-    },
+    async SetTempPath(Path) {
+        await WaitingFuncAndDo('PathTool', 'setTempPath', [Path])
+    }
+
     /**
      * 设置案件目录
      * @param Path 路径
-     * @param CallBack 回调函数
      */
-    SetCasePath: (Path, CallBack) => {
-      WaitingFuncAndDo('PathTool', 'setCasesPath', [Path, CallBack])
-    },
+    async SetCasePath(Path) {
+        await WaitingFuncAndDo('PathTool', 'setCasesPath', [Path])
+    }
+
+
     /**
      * 获取案件证据结构
      * @param {String} CaseId 案件Id
      * @param {String=} Type 类型
-     * @param {Function} CallBack 回调函数
      */
-    GetEvidence: (CaseId, Type, CallBack) => {
-      if (Type) {
-        WaitingFuncAndDo('LocalCaseTool', 'getEvidence', [CaseId, Type, CallBack])
-      } else {
-        WaitingFuncAndDo('LocalCaseTool', 'getEvidence', [CaseId, CallBack])
-      }
-    },
+    async GetEvidence(CaseId: string, Type?: string) {
+        if (Type) {
+            await    WaitingFuncAndDo('LocalCaseTool', 'getEvidence', [CaseId, Type])
+        } else {
+            await  WaitingFuncAndDo('LocalCaseTool', 'getEvidence', [CaseId])
+        }
+    }
+
     /**
      * 删除案件
      * @param CaseId 案件名
-     * @param CallBack 回调函数
      */
-    DeleteCase: (CaseId, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'deleteCase', [CaseId, CallBack])
-    },
+    async DeleteCase(CaseId: string) {
+        await WaitingFuncAndDo('LocalCaseTool', 'deleteCase', [CaseId])
+    }
+
     /**
      * 添加网络案件
-     * @param CaseName 案件名
-     * @param Creator 创建人
-     * @param Description 案件描述
-     * @param CallBack 回调函数
+     * @param {String}CaseName 案件名
+     * @param {String}Creator 创建人
+     * @param {String}Description 案件描述
      */
-    AddNetCase: (CaseName, Creator, Description, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'addCase', [CaseName, Creator, Description, CallBack])
-    },
+    async AddNetCase(CaseName: string, Creator: string, Description: string) {
+        await WaitingFuncAndDo('NetCaseTool', 'addCase', [CaseName, Creator, Description])
+    }
+
     /**
      * 共享案件
      * @param {String}NetCaseId 网络案件Id
      * @param {Array}UserId 共享用户Id
      * @param {Array}Powers 共享权限
-     * @param {Function}CallBack 回调函数
      */
-    ShareCase: (NetCaseId, UserId, Powers, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'shareCase', [NetCaseId, JSON.stringify(UserId), JSON.stringify(Powers), CallBack])
-    },
+    async ShareCase(NetCaseId: string, UserId: Array<string>, Powers: Array<string>) {
+        await  WaitingFuncAndDo('NetCaseTool', 'shareCase', [NetCaseId, JSON.stringify(UserId), JSON.stringify(Powers)])
+    }
+
     /**
      * 修改共享信息
      * @param {String}NetCaseId 共享案件Id
      * @param {Array}UserId 共享用户Id
      * @param {Array}Powers 共享权限
-     * @param {Function}CallBack 回调函数
      */
-    UpdateShareCase: (NetCaseId, UserId, Powers, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'updataSharaCase', [NetCaseId, JSON.stringify(UserId), JSON.stringify(Powers), CallBack])
-    },
+    async UpdateShareCase(NetCaseId, UserId, Powers) {
+        await WaitingFuncAndDo('NetCaseTool', 'updataSharaCase', [NetCaseId, JSON.stringify(UserId), JSON.stringify(Powers)])
+    }
+
     /**
      * 取消案件共享
      * @param {String}NetCaseId 共享案件Id
      * @param {Array}UserId 共享用户Id
-     * @param {Function}CallBack 回调函数
      */
-    CancelShare: (NetCaseId, UserId, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'reShareCase', [NetCaseId, JSON.stringify(UserId), CallBack])
-    },
+    async CancelShare(NetCaseId, UserId) {
+        await WaitingFuncAndDo('NetCaseTool', 'reShareCase', [NetCaseId, JSON.stringify(UserId)])
+    }
+
     /**
      * 获取网络案件
-     * @param {Function}CallBack 回调函数
      */
-    GetNetCaseList: (CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getNetCaseList', [CallBack])
-    },
+    async GetNetCaseList() {
+        await WaitingFuncAndDo('LocalCaseTool', 'getNetCaseList')
+    }
+
     /**
      * 上传数据
      * @param Evidences 证据数组
      * @param MetCaseId 网络案件Id
-     * @param CallBack
-     * @constructor
      */
-    UploadData: (Evidences, MetCaseId, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'uploadData', [JSON.stringify(Evidences), MetCaseId, CallBack])
-    },
+    async UploadData(Evidences, MetCaseId,) {
+        await WaitingFuncAndDo('NetCaseTool', 'uploadData', [JSON.stringify(Evidences), MetCaseId])
+    }
+
     /**
      * 获取网络案件证据结构
      * @param Evidences 证据数组
      * @param MetCaseId 网络案件Id
-     * @param CallBack 回调函数
      */
-    GetNetCaseEvidence: (Evidences, MetCaseId, CallBack) => {
-      WaitingFuncAndDo('NetCaseTool', 'getEvidence', [JSON.stringify(Evidences), MetCaseId, CallBack])
-    },
+    async GetNetCaseEvidence(Evidences, MetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'getEvidence', [JSON.stringify(Evidences), MetCaseId])
+    }
+
     /**
      * 关闭案件
-     * @param CallBack 回调函数
      */
-    CloseCase: (CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'closeCase', [CallBack])
-    },
+    async CloseCase() {
+        await WaitingFuncAndDo('LocalCaseTool', 'closeCase')
+    }
+
     /**
      * 获取案件路径
-     * @param {Function} CallBack 回调函数
      */
-    GetCasesPath: (CallBack) => {
-      WaitingFuncAndDo('PathTool', 'getCasesPath', [CallBack])
-    },
+    async GetCasesPath() {
+        await WaitingFuncAndDo('PathTool', 'getCasesPath')
+    }
+
     /**
      * 获取缓存路径
-     * @param {Function} CallBack 回调函数
      */
-    GetTempPath: (CallBack) => {
-      WaitingFuncAndDo('PathTool', 'getTempPath', [CallBack])
-    },
+    async GetTempPath() {
+        await WaitingFuncAndDo('PathTool', 'getTempPath')
+    }
+
     /**
      * 案件预览列表
      * @param {String} CaseId 案件Id
-     * @param {Function} CallBack 回调函数
      */
-    GetPreviewList: (CaseId, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getPreviewList', [CaseId, CallBack])
-    },
+    async GetPreviewList(CaseId) {
+        await WaitingFuncAndDo('LocalCaseTool', 'getPreviewList', [CaseId])
+    }
+
     /**
      * 预览一个案件
      * @param {String} Message 列表信息
-     * @param {Function}CallBack 回调函数
      */
-    GetOnePreview: (Message, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getOnePreview', [Message, CallBack])
-    },
+    async GetOnePreview(Message) {
+        await WaitingFuncAndDo('LocalCaseTool', 'getOnePreview', [Message])
+    }
+
     /**
      * 添加备注
      * @param {String}Address 邮箱地址
      * @param {String}Remark 备注内容
      * @param {Function}CallBack 回调函数
      */
-    AddRemark: (Address, Remark, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'addRemark', [Address, Remark, CallBack])
-    },
+    AddRemark(Address, Remark, CallBack) {
+        WaitingFuncAndDo('LocalCaseTool', 'addRemark', [Address, Remark, CallBack])
+    }
+
     /**
      * 获取地址备注
      * @param {String}Address 邮箱地址
-     * @param {Function}CallBack 回调函数
      */
-    GetOneRemark: (Address, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getOneRemark', [Address, CallBack])
-    },
+    async GetOneRemark(Address) {
+        await WaitingFuncAndDo('LocalCaseTool', 'getOneRemark', [Address])
+    }
+
     /**
      * 获取备注集合
-     * @param {Function} CallBack 回调函数
      */
-    GetRemarkList: (CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'getRemarkList', [CallBack])
-    },
+    async GetRemarkList() {
+        await WaitingFuncAndDo('LocalCaseTool', 'getRemarkList')
+    }
+
     /**
      * 去重
      * @param {Boolean} Flag
-     * @param {Function}CallBack 回调函数
      */
-    ReMd5: (Flag, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'ReMd5', [Flag, CallBack])
-    },
+    async ReMd5(Flag) {
+        await WaitingFuncAndDo('LocalCaseTool', 'ReMd5', [Flag])
+    }
+
     /**
      * 判断案件是否有数据
      * @param {String}CaseId 案件Id
-     * @param {Function}CallBack 回调函数
      */
-    CaseIsEmpty: (CaseId, CallBack) => {
-      WaitingFuncAndDo('LocalCaseTool', 'caseIsEmpty', [CaseId, CallBack])
-    },
+    async CaseIsEmpty(CaseId) {
+        await WaitingFuncAndDo('LocalCaseTool', 'caseIsEmpty', [CaseId])
+    }
+
     /**
      * 打开文件
      * @param Id 文件Id
-     * @param CallBack 回调函数
      */
-    OpenFile (Id, CallBack) {
-      WaitingFuncAndDo('LocalCaseTool', 'openFile', [Id, CallBack])
-    },
+    async OpenFile(Id) {
+        await WaitingFuncAndDo('LocalCaseTool', 'openFile', [Id])
+    }
+
     /**
      * 删除解析后生产的缓存文件
      * @param CaseId 案件Id
-     * @param CallBack 回调函数
      */
-    DeleteTemp (CaseId, CallBack) {
-      WaitingFuncAndDo('LocalCaseTool', 'delectTemp', [CaseId, CallBack])
-    },
+    async DeleteTemp(CaseId) {
+        await  WaitingFuncAndDo('LocalCaseTool', 'delectTemp', [CaseId])
+    }
+
     /**
      * 将本地案件变为网络案件
      * @param {String}LocalCaseId 本地案件Id
      * @param {String}Path 网络案件保存路径
-     * @param {Function}CallBack 回调函数
      */
-    UploadCase (LocalCaseId, Path, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'uploadCase', [LocalCaseId, Path, CallBack])
-    },
+    async UploadCase(LocalCaseId, Path) {
+        await WaitingFuncAndDo('NetCaseTool', 'uploadCase', [LocalCaseId, Path])
+    }
+
     /**
      * 将刚提交的成网络案件的数据上传
      * @param {String}LocalCaseId 本地案件Id
      * @param {Function}CallBack 回调函数
      */
-    UploadAllEvidences (LocalCaseId, CallBack) {
-      let Timer;
+    UploadAllEvidences(LocalCaseId, CallBack) {
+        let Timer;
 
-      function GetProgress () {
-        if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar);
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
-          if (Progress.proNum === Progress.tatal) {
-            clearTimeout(Timer)
-          }
+        function GetProgress() {
+            if (StaticInfo.progressBar) {
+                let Progress = JSON.parse(StaticInfo.progressBar);
+                CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
+                if (Progress.proNum === Progress.tatal) {
+                    clearTimeout(Timer)
+                }
+            }
+            Timer = setTimeout(GetProgress, 500)
         }
-        Timer = setTimeout(GetProgress, 500)
-      }
 
-      GetProgress();
-      let cb = (Result) => {
-        clearTimeout(Timer);//清除定时器
-        CallBack(Result)
-      };
-      WaitingFuncAndDo('NetCaseTool', 'uploadAllEvidences', [LocalCaseId, cb])
-    },
+        GetProgress();
+        let cb = (Result) => {
+            clearTimeout(Timer);//清除定时器
+            CallBack(Result)
+        };
+        WaitingFuncAndDo('NetCaseTool', 'uploadAllEvidences', [LocalCaseId, cb])
+    }
+
     /**
      * 上传本地数据到网络案件
      * @param {Array}Evidences 证据Id
      * @param {String}NetCaseId 网络案件id
      * @param {Function}CallBack 回调函数
      */
-    UploadEvidences (Evidences, NetCaseId, CallBack) {
-      let Timer;
+    UploadEvidences(Evidences, NetCaseId, CallBack) {
+        let Timer;
 
-      function GetProgress () {
-        if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar);
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
-          if (Progress.proNum === Progress.tatal) {
-            clearTimeout(Timer)
-          }
+        function GetProgress() {
+            if (StaticInfo.progressBar) {
+                let Progress = JSON.parse(StaticInfo.progressBar);
+                CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
+                if (Progress.proNum === Progress.tatal) {
+                    clearTimeout(Timer)
+                }
+            }
+            Timer = setTimeout(GetProgress, 500)
         }
-        Timer = setTimeout(GetProgress, 500)
-      }
 
-      GetProgress();
-      let cb = (Result) => {
-        clearTimeout(Timer);//清除定时器
-        CallBack(Result)
-      };
-      WaitingFuncAndDo('NetCaseTool', 'uploadEvidences', [JSON.stringify(Evidences), NetCaseId, cb])
-    },
+        GetProgress();
+        let cb = (Result) => {
+            clearTimeout(Timer);//清除定时器
+            CallBack(Result)
+        };
+        WaitingFuncAndDo('NetCaseTool', 'uploadEvidences', [JSON.stringify(Evidences), NetCaseId, cb])
+    }
+
     /**
      * 获取用户对案件的权限
      * @param {String}NetCaseId 网络案件Id
      * @param {String}UserId 用户Id
-     * @param {Function}CallBack 回调函数
      */
-    GetNetCasePowers (NetCaseId, UserId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'getCasePowers', [NetCaseId, UserId, CallBack])
-    },
+    async GetNetCasePowers(NetCaseId, UserId) {
+        await WaitingFuncAndDo('NetCaseTool', 'getCasePowers', [NetCaseId, UserId])
+    }
+
     /**
      * 离线案件
      * @param {String}NetCaseId 网络案件Id
-     * @param {String}CallBack 回调函数
      */
-    OfflineCase (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'getCase', [NetCaseId, CallBack])
-    },
+    async OfflineCase(NetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'getCase', [NetCaseId])
+    }
+
     /**
      * 判断网络案件是否离线
      * @param {String}NetCaseId 网络案件Id
-     * @param {String}CallBack 回调函数
      */
-    OfflineCaseJudge (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'offOnline', [NetCaseId, CallBack])
-    },
+    async OfflineCaseJudge(NetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'offOnline', [NetCaseId])
+    }
+
     /**
      * 下载网络案件数据
      * @param {String}NetCaseId 网络案件Id
      * @param {String}CasePath 存放目录
      * @param {Function}CallBack 回调函数
      */
-    DownloadNetCase (NetCaseId, CasePath, CallBack) {
-      let Timer;
+    DownloadNetCase(NetCaseId, CasePath, CallBack) {
+        let Timer;
 
-      function GetProgress () {
-        if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar);
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
-          if (Progress.proNum === Progress.tatal) {
-            clearTimeout(Timer)
-          }
+        function GetProgress() {
+            if (StaticInfo.progressBar) {
+                let Progress = JSON.parse(StaticInfo.progressBar);
+                CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
+                if (Progress.proNum === Progress.tatal) {
+                    clearTimeout(Timer)
+                }
+            }
+            Timer = setTimeout(GetProgress, 500)
         }
-        Timer = setTimeout(GetProgress, 500)
-      }
 
-      GetProgress();
+        GetProgress();
 
-      let cb = (Result) => {
-        clearTimeout(Timer);
-        CallBack(Result)
-      };
+        let cb = (Result) => {
+            clearTimeout(Timer);
+            CallBack(Result)
+        };
 
-      WaitingFuncAndDo('NetCaseTool', 'downloadCase', [NetCaseId, CasePath, cb])
-    },
+        WaitingFuncAndDo('NetCaseTool', 'downloadCase', [NetCaseId, CasePath, cb])
+    }
+
     /**
      * 下载网络案件单个证据
      * @param {String}NetCaseId 网络案件Id
      * @param {String}EvidenceId 证据Id
-     * @param {Function}CallBack 回调函数
      */
-    DownloadNetCaseEvidence (NetCaseId, EvidenceId, CallBack) {
-      let Timer;
+    DownloadNetCaseEvidence(NetCaseId, EvidenceId, CallBack) {
+        let Timer;
 
-      function GetProgress () {
-        if (StaticInfo.progressBar) {
-          let Progress = JSON.parse(StaticInfo.progressBar);
-          CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
-          if (Progress.proNum === Progress.tatal) {
-            clearTimeout(Timer)
-          }
+        function GetProgress() {
+            if (StaticInfo.progressBar) {
+                let Progress = JSON.parse(StaticInfo.progressBar);
+                CallBack({State: true, Msg: Progress.outPath, Progress: Progress.proNum / Progress.total});
+                if (Progress.proNum === Progress.tatal) {
+                    clearTimeout(Timer)
+                }
+            }
+            Timer = setTimeout(GetProgress, 500)
         }
-        Timer = setTimeout(GetProgress, 500)
-      }
 
-      GetProgress();
+        GetProgress();
 
-      let cb = (Result) => {
-        clearTimeout(Timer);
-        CallBack(Result)
-      };
-      WaitingFuncAndDo('NetCaseTool', 'downloadEvidence', [NetCaseId, EvidenceId, cb])
-    },
+        let cb = (Result) => {
+            clearTimeout(Timer);
+            CallBack(Result)
+        };
+        WaitingFuncAndDo('NetCaseTool', 'downloadEvidence', [NetCaseId, EvidenceId, cb])
+    }
+
     /**
      * 获取案件是否下载数据
      * @param {String}NetCaseId 网络案件Id
-     * @param {Function}CallBack 回调函数
      */
-    GetNetCaseState (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'getCaseState', [NetCaseId, CallBack])
-    },
+    async GetNetCaseState(NetCaseId) {
+        await   WaitingFuncAndDo('NetCaseTool', 'getCaseState', [NetCaseId])
+    }
+
     /**
      * 清除网络案件缓存
      * @param {String}NetCaseId 网络案件Id
-     * @param {Function}CallBack 回调函数
      */
-    ClearNetCaseData (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'clearCaseData', [NetCaseId, CallBack])
-    },
+    async ClearNetCaseData(NetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'clearCaseData', [NetCaseId])
+    }
+
     /**
      * 删除网络案件
      * @param {String}NetCaseId 网络案件Id
-     * @param {Function}CallBack 回调函数
      */
-    DeleteNetCase (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'deleteCase', [NetCaseId, CallBack])
-    },
+    async DeleteNetCase(NetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'deleteCase', [NetCaseId])
+    }
+
     /**
      * 缓存网络案件临时数据
      * @param {String}NetCaseId 网络案件
-     * @param {Function}CallBack 回调函数
      */
-    GetNetCaseTemp (NetCaseId, CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'getCaseTemp', [NetCaseId, CallBack])
-    },
+    async GetNetCaseTemp(NetCaseId) {
+        await WaitingFuncAndDo('NetCaseTool', 'getCaseTemp', [NetCaseId])
+    }
+
     /**
      * 取消上传
-     * @param {Function}CallBack 回调函数
      */
-    StopUpload (CallBack) {
-      WaitingFuncAndDo('NetCaseTool', 'stopUpload', [CallBack])
-    },
+    async StopUpload() {
+        await WaitingFuncAndDo('NetCaseTool', 'stopUpload')
+    }
+}
 
-  },
-  /**
-   * 标记类
-   */
-  Mark: {
+class Mark {
+    constructor() {
+    }
+
     /**
      * 创建标记
      * @param MarkName 标记名称
      * @param Description 标记描述
      * @param Color 颜色
-     * @param CallBack 回调函数
      */
-    CreateMark: (MarkName, Description, Color, CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'createMark', [MarkName, Description, Color, CallBack])
-    },
+    async CreateMark(MarkName, Description, Color) {
+        await WaitingFuncAndDo('MarkTool', 'createMark', [MarkName, Description, Color])
+    }
+
     /**
      * 添加标记
      * @param {String} MarkName 标记名称
      * @param {Array} Id 数据Id
-     * @param {Function}CallBack 回调函数
      */
-    AddMark: (MarkName, Id, CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'addMark', [MarkName, JSON.stringify(Id), CallBack])
-    },
+    async AddMark(MarkName, Id) {
+        await WaitingFuncAndDo('MarkTool', 'addMark', [MarkName, JSON.stringify(Id)])
+    }
+
     /**
      * 获取标记列表
-     * @param {Function}CallBack 回调函数
      */
-    GetMarkList: (CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'getMarkList', [CallBack])
-    },
+    async GetMarkList() {
+        await   WaitingFuncAndDo('MarkTool', 'getMarkList')
+    }
+
     /**
      * 删除标记
      * @param {Array}MarkName 标记名称
-     * @param {Function}CallBack 回调函数
      */
-    DeleteMark: (MarkName, CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'delectMark', [JSON.stringify(MarkName), CallBack])
-    },
+    async DeleteMark(MarkName) {
+        await WaitingFuncAndDo('MarkTool', 'delectMark', [JSON.stringify(MarkName)])
+    }
+
     /**
      * 移除标记
      * @param {Array} Ids 邮件id
-     * @param {Function} CallBack 回调函数
      */
-    RemoveMark: (Ids, CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'removeMark', [JSON.stringify(Ids), CallBack])
-    },
+    async RemoveMark(Ids, CallBack) {
+        await WaitingFuncAndDo('MarkTool', 'removeMark', [JSON.stringify(Ids)])
+    }
+
     /**
      * 标记所有
      * @param {String} MarkName 标记名称
-     * @param {Function} CallBack 回调函数
      */
-    MarkAll: (MarkName, CallBack) => {
-      WaitingFuncAndDo('MarkTool', 'addAll', [MarkName, CallBack])
+    async MarkAll(MarkName, CallBack) {
+        await WaitingFuncAndDo('MarkTool', 'addAll', [MarkName])
     }
-  },
-  /**
-   * 网络标记类
-   */
-  NetMark: {
+
     /**
      * 获取所有标记过的邮件列表
      * 无效
      * @param {Array} MarkName 标记名称
      * @param {Function} CallBack 回调函数
      */
-    GetNetMarkMailList: (MarkName, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'getAllList', [JSON.stringify(MarkName), CallBack])
-    },
+    async GetNetMarkMailList(MarkName) {
+        await WaitingFuncAndDo('NetMarkTool', 'getAllList', [JSON.stringify(MarkName)])
+    }
+
     /**
      * 获取网络标记列表
-     * @param {Function}CallBack 回调函数
      */
-    GetNetMarkList: (CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'getAllMarks', [CallBack])
-    },
+    async GetNetMarkList() {
+        await WaitingFuncAndDo('NetMarkTool', 'getAllMarks')
+    }
+
     /**
      * 创建网络标记
      * @param {String}MarkName 标记名称
      * @param {String}Description 标记描述
      * @param {String}Color 标记颜色
      * @param {Boolean}IsPublic 是否公开
-     * @param {Function}CallBack 回调函数
      */
-    AddNetMark: (MarkName, Description, Color, IsPublic, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'addMark', [MarkName, Description, Color, IsPublic, CallBack])
-    },
+    async AddNetMark(MarkName, Description, Color, IsPublic) {
+        await WaitingFuncAndDo('NetMarkTool', 'addMark', [MarkName, Description, Color, IsPublic])
+    }
+
     /**
      * 删除网络标记
      * @param {Array}MarkName 标记名称
      * @param {Function}CallBack 回调函数
      */
-    DelNetMark: (MarkName, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'delMark', [JSON.stringify(MarkName), CallBack])
-    },
+    async DelNetMark(MarkName, CallBack) {
+        await WaitingFuncAndDo('NetMarkTool', 'delMark', [JSON.stringify(MarkName)])
+    }
+
     /**
      * 网络标记数据
      * @param {Array}Ids 邮件Id
      * @param {String}MarkName 标记名称
-     * @param {Function}CallBack 回调函数
      */
-    NetMarkMail: (Ids, MarkName, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'addMailMarks', [JSON.stringify(Ids), MarkName, CallBack])
-    },
+    async NetMarkMail(Ids, MarkName, CallBack) {
+        await WaitingFuncAndDo('NetMarkTool', 'addMailMarks', [JSON.stringify(Ids), MarkName])
+    }
+
     /**
      * 更新网络标记
      * @param {String}MarkName 标记名称
      * @param {String}Description 标记描述
      * @param {String}Color 标记颜色
      * @param {Boolean}IsPublic 是否公开
-     * @param {Function}CallBack 回调函数
      */
-    UpdateNetMark: (MarkName, Description, Color, IsPublic, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'updateMark', [MarkName, Description, Color, IsPublic, CallBack])
-    },
+    async UpdateNetMark(MarkName, Description, Color, IsPublic) {
+        await  WaitingFuncAndDo('NetMarkTool', 'updateMark', [MarkName, Description, Color, IsPublic])
+    }
+
     /**
      * 移除网络标记
      * @param {Array}Ids 邮件Id
-     * @param {Function}CallBack 回调函数
      */
-    RemoveNetMarkMail: (Ids, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'removeMailMark', [JSON.stringify(Ids), CallBack])
-    },
+    async RemoveNetMarkMail(Ids, CallBack) {
+        await  WaitingFuncAndDo('NetMarkTool', 'removeMailMark', [JSON.stringify(Ids)])
+    }
+
     /**
      * 更新网络邮件的标记
      * 无效
      * @param Ids 邮件Id
      * @param MarkName 标记名称
-     * @param CallBack 回调函数
      */
-    UpdateNetMarkMail: (Ids, MarkName, CallBack) => {
-      WaitingFuncAndDo('NetMarkTool', 'updateMailMark', [JSON.stringify(Ids), MarkName, CallBack])
-    },
+    async UpdateNetMarkMail(Ids, MarkName) {
+        await  WaitingFuncAndDo('NetMarkTool', 'updateMailMark', [JSON.stringify(Ids), MarkName])
+    }
+
     /**
      * 网络标记所有数据
      * @param {String}MarkName 标记名称
-     * @param {Function}CallBack 回调函数
      */
-    AddAllMailMark (MarkName, CallBack) {
-      WaitingFuncAndDo('NetMarkTool', 'addAllMailMark', [MarkName, CallBack])
+    async AddAllMailMark(MarkName) {
+        await   WaitingFuncAndDo('NetMarkTool', 'addAllMailMark', [MarkName])
     }
-  },
-  /**
-   * 搜索类
-   */
-  Search: {
+}
+
+class Search {
+    constructor() {
+    }
+
     /**
      * 预览单条数据
      * @param Id 数据Id
-     * @param CallBack 回调函数
      */
-    SearchOne: (Id, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'searchOne', [Id, CallBack])
-    },
+    async SearchOne(Id) {
+        await  WaitingFuncAndDo('SearchTool', 'searchOne', [Id])
+    }
+
     /**
      * 获取单页数据
      * @param Query 查询条件
      * @param Start 其实页
      * @param RowCount 页大小
      * @param Sort 排序
-     * @param CallBack 回调函数
      */
-    GetPage: (Query, Start, RowCount, Sort, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'getPage', [JSON.stringify(Query), Start, RowCount, JSON.stringify(Sort), CallBack])
-    },
+    async GetPage(Query, Start, RowCount, Sort) {
+        await WaitingFuncAndDo('SearchTool', 'getPage', [JSON.stringify(Query), Start, RowCount, JSON.stringify(Sort)])
+    }
+
     /**
      * 添加已读文件
      * @param Id 邮件Id
      * @param CallBack 回调函数
      */
-    ReadFile: (Id, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'readFile', [Id, CallBack])
-    },
+    async ReadFile(Id, CallBack) {
+        await WaitingFuncAndDo('SearchTool', 'readFile', [Id])
+    }
+
     /**
      * 获取已读文件列表
      * @param CallBack 回调函数
      */
-    GetReadFiles: (CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'getReadFiles', [CallBack])
-    },
+    async GetReadFiles() {
+        await WaitingFuncAndDo('SearchTool', 'getReadFiles')
+    }
+
     /**
      * 获取智能统计数据
      * @param {Array} Query 查询条件
      * @param {String} Type 类型
-     * @param {Function} CallBack 回调函数
      */
-    GetTaxoData: (Query, Type, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'getTaxoData', [JSON.stringify(Query), Type, CallBack])
-    },
+    async GetTaxoData(Query, Type) {
+        await   WaitingFuncAndDo('SearchTool', 'getTaxoData', [JSON.stringify(Query), Type])
+    }
+
     /**
      * 获取搜索历史
      * @param {String} Type 类型
      * @param {Function} CallBack 回调函数
      */
-    GetHistory: (Type, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'getHistory', [Type, CallBack])
-    },
+    async GetHistory(Type, CallBack) {
+        await WaitingFuncAndDo('SearchTool', 'getHistory', [Type])
+    }
+
     /**
      * 删除搜索记录
      * @param {String} Query 需要删除的搜索记录
      * @param {String} Type 类型
-     * @param {Function} CallBack 回调函数
-     * @constructor
      */
-    DeleteHistory: (Query, Type, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'deleteHistory', [Query, Type, CallBack])
-    },
+    async DeleteHistory(Query, Type) {
+        await WaitingFuncAndDo('SearchTool', 'deleteHistory', [Query, Type])
+    }
+
     /**
      * 清除历史搜索
      * @param {String} Type 类型
-     * @param {Function} CallBack 回调函数
      */
-    ClearHistory: (Type, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'clearHistory', [Type, CallBack])
-    },
+    async ClearHistory(Type) {
+        await    WaitingFuncAndDo('SearchTool', 'clearHistory', [Type])
+    }
+
     /**
      * 所有邮件地址
-     * @param {Function}CallBack 回调函数
      */
-    ReAllAddress: (CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'reAllAdress', [CallBack])
-    },
+    async ReAllAddress() {
+        await  WaitingFuncAndDo('SearchTool', 'reAllAdress')
+    }
+
     /**
      * 导出视图
      * @param {String} Name 文件名
      * @param {String} Path 文件路径
      * @param {String} Id 导出证据ID
-     * @param {Function}CallBack 回调函数
      */
-    ExportDataSource: (Name, Path, Id, CallBack) => {
-      WaitingFuncAndDo('SearchTool', 'ExportDataSource', [Name, Path, Id, CallBack])
+    async ExportDataSource(Name, Path, Id) {
+        await    WaitingFuncAndDo('SearchTool', 'ExportDataSource', [Name, Path, Id])
     }
-  },
-  /**
-   * 角色类
-   */
-  Role: {
+}
+
+class Role {
+    constructor() {
+    }
+
     /**
      * 创建角色
      * @param {String}RoleName 角色名称
      * @param {Array}Powers 角色权限
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
      */
-    CreateRole: (RoleName, Powers, ClassId, CallBack) => {
-      WaitingFuncAndDo('RoleTool', 'createRole', [RoleName, JSON.stringify(Powers), ClassId, CallBack])
-    },
+    async CreateRole(RoleName, Powers, ClassId) {
+        await WaitingFuncAndDo('RoleTool', 'createRole', [RoleName, JSON.stringify(Powers), ClassId])
+    }
+
     /**
      * 更新角色
      * @param {String}RoleName 角色名称
      * @param {Array}Powers 角色权限
      * @param {String}ClassId 部门名
-     * @param {Function}CallBack 回调函数
      */
-    UpdateRole: (RoleName, Powers, ClassId, CallBack) => {
-      WaitingFuncAndDo('RoleTool', 'updataRole', [RoleName, JSON.stringify(Powers), ClassId, CallBack])
-    },
+    async UpdateRole(RoleName, Powers, ClassId) {
+        await WaitingFuncAndDo('RoleTool', 'updataRole', [RoleName, JSON.stringify(Powers), ClassId])
+    }
+
     /**
      * 删除角色
      * @param {Array}RoleName 角色名称
      * @param {String}ClassId 部门名
-     * @param {Function}CallBack 回调函数
      */
-    DeleteRole: (RoleName, ClassId, CallBack) => {
-      WaitingFuncAndDo('RoleTool', 'deleteRole', [JSON.stringify(RoleName), ClassId, CallBack])
+    async DeleteRole(RoleName, ClassId) {
+        await WaitingFuncAndDo('RoleTool', 'deleteRole', [JSON.stringify(RoleName), ClassId])
+    }
 
-    },
     /**
      * 添加角色到用户
      * @param RoleName 角色名称
      * @param UserId 用户Id
-     * @param CallBack 回调函数
      */
-    AddRole: (RoleName, UserId, CallBack) => {
-      WaitingFuncAndDo('RoleTool', 'addRole', [RoleName, UserId, CallBack])
-    },
+    async AddRole(RoleName, UserId) {
+        await WaitingFuncAndDo('RoleTool', 'addRole', [RoleName, UserId])
+    }
+
     /**
      * 获取当前部门的角色列表
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
      */
-    GetRoleList (ClassId, CallBack) {
-      WaitingFuncAndDo('RoleTool', 'getRoleList', [ClassId, CallBack])
-    },
+    async GetRoleList(ClassId) {
+        await WaitingFuncAndDo('RoleTool', 'getRoleList', [ClassId])
+    }
+
     /**
      * 获取当前部门及子部门的角色
      * @param ClassId 部门Id
-     * @param CallBack 回调函数
      */
-    GetAllRoleList (ClassId, CallBack) {
-      WaitingFuncAndDo('RoleTool', 'getAllRoleList', [ClassId, CallBack])
+    async GetAllRoleList(ClassId) {
+        await WaitingFuncAndDo('RoleTool', 'getAllRoleList', [ClassId])
     }
-  },
-  /**
-   * 用户类
-   */
-  User: {
+}
+
+class User {
+    constructor() {
+    }
+
     /**
      * 添加用户
      * @param {String}UserName 用户名
@@ -815,11 +787,11 @@ const $this = {
      * @param {String}RoleName 角色名
      * @param {String}IdCard 身份证
      * @param {String}Name 名称
-     * @param {Function}CallBack 回调函数
      */
-    CreateUser: (UserName, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name, CallBack) => {
-      WaitingFuncAndDo('UserTool', 'createUser', [UserName, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name, CallBack])
-    },
+    async CreateUser(UserName, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name) {
+        await  WaitingFuncAndDo('UserTool', 'createUser', [UserName, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name])
+    }
+
     /**
      * 更新用户
      * @param {String}UserId 用户Id
@@ -830,135 +802,135 @@ const $this = {
      * @param {String}RoleName 角色名
      * @param {String}IdCard 身份证
      * @param {String}Name 姓名
-     * @param {Function}CallBack 回调函数
      */
-    UpdateUser: (UserId, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name, CallBack) => {
-      WaitingFuncAndDo('UserTool', 'updataUser', [UserId, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name, CallBack])
-    },
+    async UpdateUser(UserId, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name) {
+        await        WaitingFuncAndDo('UserTool', 'updataUser', [UserId, PassWord, ClassId, Number, Phone, RoleName, IdCard, Name])
+    }
+
     /**
      * 用户登录
      * @param UserName 用户名
      * @param PassWord 密码
-     * @param CallBack 回调函数
      */
-    Login: (UserName, PassWord, CallBack) => {
-      WaitingFuncAndDo('UserTool', 'login', [UserName, PassWord, CallBack])
-    },
+    async Login(UserName, PassWord) {
+        await        WaitingFuncAndDo('UserTool', 'login', [UserName, PassWord])
+    }
+
+
     /**
      * 删除用户
      * @param {Array}UserId 用户Id
-     * @param {Function}CallBack 回调函数
      */
-    DeleteUser (UserId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'deleteUser', [JSON.stringify(UserId), CallBack])
-    },
+    async DeleteUser(UserId) {
+        await  WaitingFuncAndDo('UserTool', 'deleteUser', [JSON.stringify(UserId)])
+    }
+
     /**
      * 获取用户列表
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
      */
-    GetUserList (ClassId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getUserList', [ClassId, CallBack])
-    },
+    async GetUserList(ClassId, CallBack) {
+        await WaitingFuncAndDo('UserTool', 'getUserList', [ClassId])
+    }
+
     /**
      * 获取当前部门及子部门的用户列表
      * @param ClassId 部门Id
-     * @param CallBack 回调函数
      */
-    GetAllUserList (ClassId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getAllUserList', [ClassId, CallBack])
-    },
+    async GetAllUserList(ClassId) {
+        await WaitingFuncAndDo('UserTool', 'getAllUserList', [ClassId])
+    }
+
     /**
      * 给用户添加角色
      * @param {String}RoleName 角色名
      * @param {String}UserId 用户Id
-     * @param {Function}CallBack 回调函数
-     * @constructor
      */
-    AddRole (RoleName, UserId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'addRole', [RoleName, UserId, CallBack])
-    },
+    async AddRole(RoleName, UserId) {
+        await   WaitingFuncAndDo('UserTool', 'addRole', [RoleName, UserId])
+    }
+
     /**
      * 判断用户是否登录
-     * @param {Function}CallBack 回调函数
-     * @constructor
      */
-    IsOnLine (CallBack) {
-      WaitingFuncAndDo('UserTool', 'isOnline', [CallBack])
-    },
+    async IsOnLine() {
+        await    WaitingFuncAndDo('UserTool', 'isOnline')
+    }
+
     /**
      * 获取权限
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
      */
-    GetPowers (ClassId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getPowers', [ClassId, CallBack])
-    },
+    async GetPowers(ClassId) {
+        await WaitingFuncAndDo('UserTool', 'getPowers', [ClassId])
+    }
+
+
     /**
      * 测试连接
      * @param {String}Address Ip地址
-     * @param {Function}CallBack 回调函数
      */
-    GetOnline (Address, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getOnline', [Address, CallBack])
-    },
+    async GetOnline(Address) {
+        await        WaitingFuncAndDo('UserTool', 'getOnline', [Address])
+    }
+
+
     /**
      * 退出登录
-     * @param {Function}CallBack 回调函数
      */
-    Logout (CallBack) {
-      WaitingFuncAndDo('UserTool', 'logout', [CallBack])
-    },
+    async Logout() {
+        await WaitingFuncAndDo('UserTool', 'logout')
+    }
+
     /**
      * 获取Ip
-     * @param {Function}CallBack 回调函数
      */
-    GetIp (CallBack) {
-      WaitingFuncAndDo('UserTool', 'getIp', [CallBack])
-    },
+    async GetIp() {
+        await WaitingFuncAndDo('UserTool', 'getIp')
+    }
+
+
     /**
      * 设置Ip
      * @param {String}Ip Ip地址
-     * @param {Function}CallBack 回调函数
      */
-    SetIp (Ip, CallBack) {
-      WaitingFuncAndDo('UserTool', 'setIp', [Ip, CallBack])
-    },
+    async SetIp(Ip) {
+        await        WaitingFuncAndDo('UserTool', 'setIp', [Ip])
+    }
+
+
     /**
      * 获取分享案件的部门用户
      * @param {String}ClassId 部门Id
      * @param {String}CaseId 案件Id
-     * @param {Function}CallBack 回调函数
      */
-    GetCaseUserList (ClassId, CaseId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getCaseUserList', [ClassId, CaseId, CallBack])
-    },
+    async GetCaseUserList(ClassId, CaseId) {
+        await WaitingFuncAndDo('UserTool', 'getCaseUserList', [ClassId, CaseId])
+    }
+
     /**
      * 获取案件的所有共享人
      * @param {String}CaseId 案件Id
-     * @param {Function}CallBack 回调函数
      */
-    GetCaseManager (CaseId, CallBack) {
-      WaitingFuncAndDo('UserTool', 'getCaseManagers', [CaseId, CallBack])
+    async GetCaseManager(CaseId) {
+        await WaitingFuncAndDo('UserTool', 'getCaseManagers', [CaseId])
     }
-  },
-  /**
-   * 导出类
-   */
-  Export: {
+}
+
+class Export {
     /**
      * 导出到HTML
      * @param {Object} Param 导出参数
-     * @param {Function} CallBack 回调函数
      */
-    ToHtml: (Param, CallBack) => {
-      WaitingFuncAndDo('ExportFileHtml', 'export', [JSON.stringify(Param), CallBack])
+    async ToHtml(Param) {
+        await WaitingFuncAndDo('ExportFileHtml', 'export', [JSON.stringify(Param)])
     }
-  },
-  /**
-   * 关系图类
-   */
-  RelationShip: {
+}
+
+class RelationShip {
+    constructor() {
+    }
+
     /**
      * 获取关系图数据
      * @param {Array} Param 参数
@@ -966,56 +938,56 @@ const $this = {
      * @param {Object} Filter 数据过滤
      * @param {Function}CallBack 回调函数
      */
-    GetShipData: (Param, Type, Filter, CallBack) => {
-      let cb = (MSG) => {
-        if (MSG.State) {
-          let Path = path.resolve(__dirname, 'app/data/relationship.json');
-          Common.CheckAndCreatePath(path.dirname(Path));
-          fs.writeFile(path.join(__dirname, 'app/data/relationship.json'), MSG.Data, (err) => {
-            if (err) {
-              LogHelper.writeErr(err);
-              MSG.State = false;
-              MSG.Msg = 'Write Data To JSON Error';
-              CallBack(MSG)
+    GetShipData(Param, Type, Filter, CallBack) {
+        let cb = (MSG) => {
+            if (MSG.State) {
+                let Path = resolve(__dirname, 'app/data/relationship.json');
+                Common.CheckAndCreatePath(dirname(Path));
+                writeFile(join(__dirname, 'app/data/relationship.json'), MSG.Data, (err) => {
+                    if (err) {
+                        LogHelper.writeErr(err);
+                        MSG.State = false;
+                        MSG.Msg = 'Write Data To JSON Error';
+                        CallBack(MSG)
+                    } else {
+                        CallBack(MSG)
+                    }
+                })
             } else {
-              CallBack(MSG)
+                CallBack(MSG)
             }
-          })
-        } else {
-          CallBack(MSG)
-        }
-      };
-      WaitingFuncAndDo('RelationShip', 'reShip', [JSON.stringify(Param), Type, JSON.stringify(Filter), cb])
-    },
+        };
+        WaitingFuncAndDo('RelationShip', 'reShip', [JSON.stringify(Param), Type, JSON.stringify(Filter), cb])
+    }
+
     /**
      * 关系图所有邮件地址
-     * @param {Function}CallBack 回调函数
      */
-    ReAllAddress: (CallBack) => {
-      WaitingFuncAndDo('RelationShip', 'reAllAdress', [CallBack])
-    },
+    async ReAllAddress() {
+        await WaitingFuncAndDo('RelationShip', 'reAllAdress')
+    }
+
     /**
      * 获取地址不同昵称
      * @param {String}Address 邮件地址
-     * @param {Function}CallBack 回调函数
      */
-    RePerson (Address, CallBack) {
-      WaitingFuncAndDo('RelationShip', 'rePerson', [Address, CallBack])
-    },
+    async RePerson(Address) {
+        await  WaitingFuncAndDo('RelationShip', 'rePerson', [Address])
+    }
+
     /**
      * 获取昵称不同地址
      * @param {String}Person 昵称
-     * @param {Function}CallBack 回调函数
-     * @constructor
      */
-    ReAddress (Person, CallBack) {
-      WaitingFuncAndDo('RelationShip', 'reAdress', [Person, CallBack])
+    async ReAddress(Person) {
+        await WaitingFuncAndDo('RelationShip', 'reAdress', [Person])
     }
-  },
-  /**
-   * 话单类
-   */
-  Phone: {
+}
+
+class Phone {
+    constructor() {
+    }
+
     /**
      * 添加证据
      * @param {Array} FilePath 文件路径
@@ -1024,11 +996,11 @@ const $this = {
      * @param {String} EvidenceName 证据名称
      * @param {String} Creator 创建人
      * @param {String} Description 描述
-     * @param {Function}CallBack 回调函数
      */
-    AddEvidence: (CaseId, EvidenceName, Creator, FilePath, Description, ModelName, CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'addEvidence', [CaseId, EvidenceName, Creator, JSON.stringify(FilePath), Description, ModelName, CallBack])
-    },
+    async AddEvidence(CaseId, EvidenceName, Creator, FilePath, Description, ModelName) {
+        await WaitingFuncAndDo('PhoneTool', 'addEvidence', [CaseId, EvidenceName, Creator, JSON.stringify(FilePath), Description, ModelName])
+    }
+
     /**
      * 创建模版
      * @param {String} Name 模版名称
@@ -1037,26 +1009,26 @@ const $this = {
      * @param {Number} DateNum 通话时间
      * @param {Number} TimeNum 通话时长
      * @param {Number} TypeNum 通话类型
-     * @param {Function} CallBack 回调函数
      */
-    CreateModel: (Name, MyNum, ONum, DateNum, TimeNum, TypeNum, CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'createModel', [Name, MyNum, ONum, DateNum, TimeNum, TypeNum, CallBack])
-    },
+    async CreateModel(Name, MyNum, ONum, DateNum, TimeNum, TypeNum) {
+        await WaitingFuncAndDo('PhoneTool', 'createModel', [Name, MyNum, ONum, DateNum, TimeNum, TypeNum])
+    }
+
     /**
      * 获取模版列表
-     * @param {Function} CallBack
      */
-    GetModelList: (CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'getModelList', [CallBack])
-    },
+    async GetModelList() {
+        await WaitingFuncAndDo('PhoneTool', 'getModelList')
+    }
+
     /**
      * 获取模版
      * @param {String} ModelName 模版名称
-     * @param {Function} CallBack 回调函数
      */
-    GetModel: (ModelName, CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'getModel', [ModelName, CallBack])
-    },
+    async GetModel(ModelName) {
+        await    WaitingFuncAndDo('PhoneTool', 'getModel', [ModelName])
+    }
+
     /**
      * 更新模版
      * @param {String} Name 模版名称
@@ -1065,282 +1037,280 @@ const $this = {
      * @param {Number} DateNum 通话时间
      * @param {Number} TimeNum 通话时长
      * @param {Number} TypeNum 通话类型
-     * @param {Function} CallBack 回调函数
      */
-    UpdateModel: (Name, MyNum, ONum, DateNum, TimeNum, TypeNum, CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'createModel', [Name, MyNum, ONum, DateNum, TimeNum, TypeNum, CallBack])
-    },
+    async UpdateModel(Name, MyNum, ONum, DateNum, TimeNum, TypeNum) {
+        await WaitingFuncAndDo('PhoneTool', 'createModel', [Name, MyNum, ONum, DateNum, TimeNum, TypeNum])
+    }
+
     /**
      * 删除模版
      * @param {String} ModelName 模版名称
-     * @param {Function} CallBack 回调函数
      */
-    DeleteModel: (ModelName, CallBack) => {
-      WaitingFuncAndDo('PhoneTool', 'getModel', [ModelName, CallBack])
+    async DeleteModel(ModelName) {
+        await  WaitingFuncAndDo('PhoneTool', 'getModel', [ModelName])
     }
-  },
-  /**
-   * 检测时间类
-   */
-  CheckTime: {
+}
+
+class CheckTime {
+    constructor() {
+    }
+
     /**
      * 检测
-     * @param CallBack 回调函数
      */
-    Check: (CallBack) => {
-      WaitingFuncAndDo('CheckTime', 'check', [CallBack])
+    async Check() {
+        await WaitingFuncAndDo('CheckTime', 'check')
     }
-  },
-  /**
-   * 部门类
-   */
-  Class: {
+}
+
+class Class {
+    constructor() {
+    }
+
     /**
      * 添加一个部门
      * @param {String}ClassName 部门名称
      * @param {String=}FatherId 上级部门Id
-     * @param {Function}CallBack 回调函数
      */
-    AddClass (ClassName, FatherId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'addOne', [ClassName, FatherId, CallBack])
-    },
+    async AddClass(ClassName, FatherId) {
+        await WaitingFuncAndDo('ClassTool', 'addOne', [ClassName, FatherId])
+    }
+
     /**
      * 获取所有部门列表
-     * @param {Function}CallBack 回调函数
      */
-    GetList (CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getList', [CallBack])
-    },
+    async GetList() {
+        await   WaitingFuncAndDo('ClassTool', 'getList')
+    }
+
     /**
      * 删除部门
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack
      */
-    DeleteClass (ClassId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'deletOne', [ClassId, CallBack])
-    },
+    async DeleteClass(ClassId) {
+        await WaitingFuncAndDo('ClassTool', 'deletOne', [ClassId])
+    }
+
     /**
      * 修改部门
      * @param {String}ClassId 部门Id
      * @param {String}NewClassName 新部门名称
      * @param {String}FatherId 父级部门Id
-     * @param {Function}CallBack 回调函数
      */
-    UpdateClass (ClassId, NewClassName, FatherId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'updataClass', [ClassId, NewClassName, FatherId, CallBack])
-    },
+    async UpdateClass(ClassId, NewClassName, FatherId) {
+        await WaitingFuncAndDo('ClassTool', 'updataClass', [ClassId, NewClassName, FatherId])
+    }
+
     /**
      * 获取用户日志
      * @param {String}UserId 用户Id
-     * @param {Function}CallBack 回调函数
      */
-    GetUserLog (UserId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getUserLog', [UserId, CallBack])
-    },
+    async GetUserLog(UserId) {
+        await  WaitingFuncAndDo('ClassTool', 'getUserLog', [UserId])
+    }
+
     /**
      * 获取当前部门日志
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
      */
-    GetClassLog (ClassId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getClassLog', [ClassId, CallBack])
-    },
+    async GetClassLog(ClassId) {
+        await WaitingFuncAndDo('ClassTool', 'getClassLog', [ClassId])
+    }
+
     /**
      * 获取当前部门及子部门
      * @param {String}ClassId 部门Id
-     * @param {Function}CallBack 回调函数
-     * @constructor
      */
-    GetAllClassLog (ClassId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getAllClassLog', [ClassId, CallBack])
-    },
+    async GetAllClassLog(ClassId) {
+        await WaitingFuncAndDo('ClassTool', 'getAllClassLog', [ClassId])
+    }
+
     /**
      * 获取所有日志
      * @param {Function}CallBack 回调函数
      */
-    GetAllLog (CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getAlllog', [CallBack])
-    },
+    async GetAllLog(CallBack) {
+        await  WaitingFuncAndDo('ClassTool', 'getAlllog')
+    }
+
     /**
      * 获取案件日志
      * @param {String}CaseId 案件Id
-     * @param {Function}CallBack 回调函数
      */
-    GetCaseLog (CaseId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getCaseLog', [CaseId, CallBack])
-    },
+    async GetCaseLog(CaseId) {
+        await WaitingFuncAndDo('ClassTool', 'getCaseLog', [CaseId])
+    }
+
     /**
      * 获取当前和子集部门
      * @param {String}ClassId 部门Id
      * @param {Function}CallBack 回调函数
      */
-    GetChildrenList (ClassId, CallBack) {
-      WaitingFuncAndDo('ClassTool', 'getChildrenList', [ClassId, CallBack])
+    async GetChildrenList(ClassId, CallBack) {
+        await WaitingFuncAndDo('ClassTool', 'getChildrenList', [ClassId])
     }
-  }
-};
-
-let Started = false;
+}
 
 /**
  * 初始化Java
  */
-function Init () {
-  try {
-    java.classpath.push(path.resolve(__dirname, '../Java/FileAnalysis.jar'));//引用jar包
-    StaticInfo = java.import('Static.StaticInfo')//引用静态类
-  } catch (e) {
-    LogHelper.writeErr(e);
-    ee.emit('Error', {State: 'err', Msg: Error['-3']})
-  }
-
-  java.newInstance('tool.Start', (err, Start) => {//实例化Start类
-    if (err) {
-      LogHelper.writeErr(err);
-      ee.emit('Error', {State: 'err', Msg: Error['-1']})
-    } else {
-      Start.start((err) => {//初始化程序
-        if (err) {
-          LogHelper.writeErr(err);
-          ee.emit('Error', {State: 'err', Msg: Error['-2']})
-        } else {
-          LogHelper.writeInfo('Application Init');
-          Started = true;
-          ee.emit('Started')
-        }
-      })
+function Init() {
+    try {
+        java.classpath.push(resolve(__dirname, '../Java/FileAnalysis.jar'));//引用jar包
+        StaticInfo = java.import('Static.StaticInfo')//引用静态类
+    } catch (e) {
+        LogHelper.writeErr(e);
+        ee.emit('Error', {State: 'err', Msg: Error['-3']})
     }
-  });
-  ee.on('Started', () => {
-    WaitingStart()
-  })
+
+    java.newInstance('tool.Start', (err, Start) => {//实例化Start类
+        if (err) {
+            LogHelper.writeErr(err);
+            ee.emit('Error', {State: 'err', Msg: Error['-1']})
+        } else {
+            Start.start((err) => {//初始化程序
+                if (err) {
+                    LogHelper.writeErr(err);
+                    ee.emit('Error', {State: 'err', Msg: Error['-2']})
+                } else {
+                    LogHelper.writeInfo('Application Init');
+                    ee.emit('Started')
+                }
+            })
+        }
+    });
 }
 
-/**
- * 等待Java程序初始化
- */
-function WaitingStart () {
-  for (let Class in JavaClass) {//遍历需要实例化的Java类
-    java.newInstance('tool.' + Class, (err, NewClass) => {//实例化Java类
-      if (err) {//实例化错误
-        LogHelper.writeErr(err);
-        ee.emit('Error', {State: 'err', Msg: 'Init Class:' + Class + ' Error'})
-      } else {
-        JavaClass[Class] = NewClass;
-        ee.emit('Init' + Class)
-      }
-    })
-  }
-}
 
 /**
  * 检测Jre环境是否存在
  */
-function CheckedJre () {
-  LogHelper.writeInfo('Checking Jre');
+function CheckedJre() {
+    LogHelper.writeInfo('Checking Jre');
 
-  let dll, dylib, so, soFiles, binary, home = __dirname,
-    jvmPathx86 = path.resolve(__dirname, '../jre/bin/client/jvm.dll'),
-    jvmPathx64 = path.resolve(__dirname, '../jre/bin/server/jvm.dll');
-  dll = fs.existsSync(jvmPathx86) ? jvmPathx86 : jvmPathx64;
+    let dll, dylib, so, soFiles, binary, home = __dirname,
+        jvmPathx86 = resolve(__dirname, '../jre/bin/client/jvm.dll'),
+        jvmPathx64 = resolve(__dirname, '../jre/bin/server/jvm.dll');
+    dll = existsSync(jvmPathx86) ? jvmPathx86 : jvmPathx64;
 
-  binary = dll || dylib || so;
+    binary = dll || dylib || so;
 
-  let jvm_dll_path = path.resolve(__dirname, '../node_modules/java/build/jvm_dll_path.json');
-  let jvmPath = binary ? JSON.stringify(path.delimiter + path.dirname(path.resolve(home, binary))) : '""';
-  if (fs.existsSync(jvm_dll_path)) {
-    fs.readFile(jvm_dll_path, (err, text) => {
-      if (err) LogHelper.writeErr(err);
-      if (text.toString() === jvmPath) {
-        ImportJava()
-      } else {
+    let jvm_dll_path = resolve(__dirname, '../node_modules/java/build/jvm_dll_path.json');
+    let jvmPath = binary ? JSON.stringify(delimiter + dirname(resolve(home, binary))) : '""';
+    if (existsSync(jvm_dll_path)) {
+        readFile(jvm_dll_path, (err, text) => {
+            if (err) LogHelper.writeErr(err);
+            if (text.toString() === jvmPath) {
+                ImportJava()
+            } else {
+                WriteJvmPath()
+            }
+        })
+    } else {
         WriteJvmPath()
-      }
-    })
-  } else {
-    WriteJvmPath()
-  }
+    }
 
-  /**
-   * 写入Jvm路径
-   */
-  function WriteJvmPath () {
-    LogHelper.writeInfo('WriteJvmPath');
-    fs.writeFile(jvm_dll_path, jvmPath, (err) => {
-      if (!err) {ImportJava()} else {
-        LogHelper.writeErr(err)
-      }
-    })
-  }
+    /**
+     * 写入Jvm路径
+     */
+    function WriteJvmPath() {
+        LogHelper.writeInfo('WriteJvmPath');
+        writeFile(jvm_dll_path, jvmPath, (err) => {
+            if (!err) {
+                ImportJava()
+            } else {
+                LogHelper.writeErr(err)
+            }
+        })
+    }
 
-  /**
-   * 导入java
-   */
-  function ImportJava () {
-    LogHelper.writeInfo('ImportJava');
-    import('java').then((module) => {
-      java = module;
-      Init()
-    }).catch((err) => {
-      LogHelper.writeErr(err)
-    })
-  }
+    /**
+     * 导入java
+     */
+    function ImportJava() {
+        LogHelper.writeInfo('ImportJava');
+        import('java').then((module) => {
+            java = module;
+            Init()
+        }).catch((err) => {
+            LogHelper.writeErr(err)
+        })
+    }
 
+}
+
+/**
+ *@param {String} Class 类名
+ * 等待Java程序初始化
+ */
+function InitClass(Class) {
+    return new Promise((resolve, reject) => {
+        java.newInstance('file.' + Class, (err, NewClass) => {//实例化Java类
+            if (err) {//实例化错误
+                LogHelper.writeErr(err);
+                reject(err)
+            } else {
+                JavaClass[Class] = NewClass;
+                resolve(true)
+            }
+        })
+    })
 }
 
 /**
  * 等待类实例化并统一执行
  * @param ClassName 类名
  * @param FuncName 方法名
- * @param Args 参数
+ * @param {Array=}Args 参数
  */
-function WaitingFuncAndDo (ClassName, FuncName, Args) {
-  if (JavaClass[ClassName]) {
-    DoFunc()
-  } else {
-    ee.on('Init' + ClassName, () => {
-      DoFunc()
+async function WaitingFuncAndDo(ClassName: string, FuncName: string, Args?: Array<number | string | Function>) {
+    return new Promise(async (resolve, reject) => {
+        if (!JavaClass[ClassName]) if (!await InitClass(ClassName)) throw new Error(`类:${ClassName} 实例化失败`);
+        if (!Args) Args = [];
+        Args[Args.length] = (err, Msg) => {
+            if (err) {//调用失败
+                LogHelper.writeErr(err);
+                resolve({State: false, Msg: 'Call Method:' + FuncName + ' Error'})
+            } else {//调用成功
+                let Res;
+                try {
+                    Res = JSON.parse(Msg)//解析消息体
+                } catch (err) {
+                    LogHelper.writeErr(err);
+                    resolve({State: false, Msg: '无法解析数据:' + Msg})
+                }
+                if (Res.State) {//成功消息
+                    resolve({State: true, Msg: Res.Msg, Data: Res.Data})
+                } else {//错误消息
+                    resolve({State: false, Msg: Res.Msg})
+                }
+            }
+        };
+        JavaClass[ClassName][FuncName](...Args)
     })
-  }
-
-  function DoFunc () {
-    if (typeof FuncName === 'string') {//如果为调用方法名,则执行统一回调函数
-      let CallBack = Args[Args.length - 1];
-      Args[Args.length - 1] = (err, Msg) => {
-        CallBackDone(err, Msg, FuncName, CallBack)
-      };
-      JavaClass[ClassName][FuncName](...Args)
-    } else {//如果不是则执行回调函数
-      FuncName()
-    }
-  }
 }
 
-/**
- * Java调用统一回调函数
- */
-function CallBackDone (err, Msg, FuncName, CallBack) {
-  if (err) {//调用失败
-    LogHelper.writeErr(err);
-    ee.emit('Error', {State: false, Msg: 'Call Method:' + FuncName + ' Error'});
-    CallBack({State: false, Msg: 'Call Method:' + FuncName + ' Error'})
-  } else {//调用成功
-    let Res;
-    try {
-      Res = JSON.parse(Msg)//解析消息体
-    } catch (err) {
-      LogHelper.writeErr(err);
-      ee.emit('Error', {State: false, Msg: '无法解析数据:' + Msg});
-      CallBack({State: false, Msg: '无法解析数据:' + Msg})
-    }
-    if (Res.State) {//成功消息
-      CallBack({State: true, Msg: Res.Msg, Data: Res.Data})
-    } else {//错误消息
-      ee.emit('Error', {State: false, Msg: Res.Msg});
-      CallBack({State: false, Msg: Res.Msg})
-    }
-  }
-}
+// export default $this;
 
-CheckedJre();
-export default $this
+export default class {
+    public Case: Case;
+    public Mark: Mark;
+    public Search: Search;
+    public Role: Role;
+    public User: User;
+    public Export: Export;
+    public Phone: Phone;
+    public Class: Class;
+
+    constructor() {
+        CheckedJre();
+        this.Case = new Case();
+        this.Mark = new Mark();
+        this.Search = new Search();
+        this.Role = new Role();
+        this.User = new User();
+        this.Export = new Export();
+        this.Phone = new Phone();
+        this.Class = new Class()
+    }
+}
