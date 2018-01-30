@@ -50,15 +50,15 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
+  import state from '../vuex/index'
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
 
-  import state from '../vuex'
-
-  export default {
-    computed: {
-      CurrentCase () {
-        return state.getters.GetCurrentCase
-      },
+  @Component
+  export default class CaseInfo extends Vue {
+    get CurrentCase () {
+      return state.getters.GetCurrentCase
     }
   }
 </script>

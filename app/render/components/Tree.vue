@@ -16,29 +16,31 @@
     </li>
   </ul>
 </template>
-<script>
-  export default {
-    name: 'Tree',
-    data () {
-      return {}
-    },
-    props: {
-      Data: Array,
-      Options: Object
-    },
-    computed: {},
-    methods: {
-      Toggle (item) {
-        this.$set(item, 'Expanded', !item.Expanded)
-      },
-      Select (item) {
-        if (!item.Selectable) {
-          this.$set(this.Options, 'SelectedId', item.Id)
-          this.Options.Click(this, item)
-        }
-      }, Check (item) {
-        this.$set(item, 'Checked', !item.Checked)
+<script lang="ts">
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
+
+  @Component
+  export default class Tree extends Vue {
+    name = 'Tree'
+
+    Data: Array
+    Options: Object
+
+    Toggle (item) {
+      this.$set(item, 'Expanded', !item.Expanded)
+    }
+
+    Select (item) {
+      if (!item.Selectable) {
+        this.$set(this.Options, 'SelectedId', item.Id)
+        this.Options.Click(this, item)
       }
     }
+
+    Check (item) {
+      this.$set(item, 'Checked', !item.Checked)
+    }
+
   }
 </script>

@@ -8,17 +8,22 @@
       </span>
   </div>
 </template>
-<script>
-  export default {
-    props: {
-      Options: {placeholder: '', Path: ''},
-    }, methods: {
-      Choose () {
-        this.$el.querySelector('input[type=file]').click()
-      }, PathChange (e) {
-        this.Options.Path = e.target.value
-        e.target.value = null
-      }
+<script lang="ts">
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
+
+  @Component
+  export default class extends Vue {
+    Options: { placeholder: '', Path: '' }
+
+    Choose () {
+      this.$el.querySelector('input[type=file]').click()
     }
+
+    PathChange (e) {
+      this.Options.Path = e.target.value
+      e.target.value = null
+    }
+
   }
 </script>

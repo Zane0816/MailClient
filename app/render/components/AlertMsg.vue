@@ -8,19 +8,21 @@
     <!--<p v-for="item in Messages">{{item.Message}}</p>-->
   </div>
 </template>
-<script>
+<script lang="ts">
   import store from '../vuex/index'
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
 
-  export default {
-    computed: {
-      Messages () {
-        return store.getters.GetAllMessages
-      }
-    },
-    methods: {
-      CloseMsg (MsgId) {
-        store.dispatch('RemoveMessage', MsgId)
-      }
+  @Component
+  export default class AlertMsg extends Vue {
+
+    get Messages () {
+      return store.getters.GetAllMessages
     }
+
+    CloseMsg (MsgId) {
+      store.dispatch('RemoveMessage', MsgId)
+    }
+
   }
 </script>

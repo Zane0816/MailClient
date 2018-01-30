@@ -50,22 +50,22 @@
     </Modal>
   </div>
 </template>
-<script>
+<script lang="ts">
   import Modal from '../components/Modal'
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
 
-  export default {
-    components: {Modal},
-    data () {
-      return {
-        AboutConfig: {Show: true, Size: 1, NoFooter: true},
-        IsLogged: false
-      }
-    },
-    methods: {
-      ShowAbout () {
-        this.AboutConfig.Show = !this.AboutConfig.Show
-      },
-    },
+  @Component({
+    components: {Modal}
+  })
+  export default class Manager extends Vue {
+    AboutConfig = {Show: true, Size: 1, NoFooter: true}
+    IsLogged: false
+
+    ShowAbout () {
+      this.AboutConfig.Show = !this.AboutConfig.Show
+    }
+
     mounted () {
       this.$router.push('/Home/Case')
     }

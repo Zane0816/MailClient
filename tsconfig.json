@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es5",
     "sourceMap": true,
+    "strict": true,
+    "noImplicitThis": true,
     "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
     "lib": [
-      "es2015",
-      "dom"
+      "es5",
+      "dom",
+      "es2015.promise"
     ]
   },
   "exclude": [

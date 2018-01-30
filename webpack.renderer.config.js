@@ -11,7 +11,8 @@ let rendererConfig = {
   devtool: '#eval-source-map',
   devServer: {hotOnly: true, port: 9003, historyApiFallback: true},
   entry: {
-    app: path.join(__dirname, 'app/render/index.js'),
+    app: path.join(__dirname, 'app/render/index.ts'),
+    vendor: ['vue', 'vuex', 'Vue-router']
   },
   // externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -28,22 +29,27 @@ let rendererConfig = {
         use: 'html-loader'
       },
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
+        test: /\.ts$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+
+      },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
         options: {
-          presets: ['es2015'],
-        },
-        include: [path.resolve(__dirname, 'app')],
-        exclude: /node_modules/
+          appendTsSuffixTo: [/\.vue$/]
+        }
       },
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
+        loader: 'Vue-loader',
         options: {
           loaders: {
             css: ExtractTextPlugin.extract({
               use: 'css-loader',
-              fallback: 'vue-style-loader' // <- this is a dep of vue-loader, so no need to explicitly install if using npm3
+              fallback: 'Vue-style-loader' // <- this is a dep of Vue-loader, so no need to explicitly install if using npm3
             })
           }
         }
@@ -82,24 +88,10 @@ let rendererConfig = {
       template: './app/index.html'
     }),
     new webpack.NoEmitOnErrorsPlugin(),
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   name: 'commons',
-    //   // (the commons chunk name)
-    //
-    //   filename: 'commons.js',
-    //   // (the filename of the commons chunk)
-    //
-    //   minChunks: 3,
-    //   // (Modules must be shared between 3 entries)
-    //
-    //   // chunks: ["pageA", "pageB"],
-    //   // (Only use these entries)
-    // })
-    // new webpack.ProvidePlugin({
-    //   d3: 'd3',
-    //   jQuery: 'jquery',
-    //   $: 'jquery'
-    // }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      filename: 'vendor.js'
+    }),
     // new CopyWebpackPlugin([
     //   {context: 'app', from: 'data/**/*'}
     // ]),
@@ -112,9 +104,9 @@ let rendererConfig = {
   resolve: {
     // alias: {
     //   'app': path.join(__dirname, 'app/'),
-    //   vue: 'vue/dist/vue.js',
+    //   Vue: 'Vue/dist/Vue.js',
     // },
-    extensions: ['.js', '.vue', '.json', '.css', '.node'],
+    extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node'],
     modules: [
       path.join(__dirname, 'node_modules')
     ]

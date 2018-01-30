@@ -16,9 +16,7 @@ let mainConfig = {
         test: /\.ts$/,
         loader: 'ts-loader',
         exclude: /node_modules/,
-        // options: {
-        //   presets: ['es2015']
-        // }
+
       },
       {
         test: /\.json$/,

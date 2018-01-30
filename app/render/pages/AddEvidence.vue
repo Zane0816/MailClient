@@ -59,29 +59,31 @@
     </div>
   </div>
 </template>
-<script>
-  import state from '../vuex'
+<script lang="ts">
+  import state from '../vuex/index'
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
 
-  export default {
-    data () {
-      return {
-        Case: {},
-        PathTarget: null
-      }
-    },
-    methods: {
-      AddEvidence () {
-        state.dispatch('AddCase', this.Case)
-        this.$router.push('/Home/Case')
-      },
-      PathChange (e) {
-        this.$set(this.Case, this.PathTarget, e.target.value)
-        e.target.value = null
-      },
-      Choose (Target) {
-        this.PathTarget = Target
-        this.$el.querySelector('input[type=file]').click()
-      }
+  @Component
+  export default class AddEvidence extends Vue {
+
+    Case = {}
+    PathTarget = null
+
+    AddEvidence () {
+      state.dispatch('AddCase', this.Case)
+      this.$router.push('/Home/Case')
     }
+
+    PathChange (e) {
+      this.$set(this.Case, this.PathTarget, e.target.value)
+      e.target.value = null
+    }
+
+    Choose (Target) {
+      this.PathTarget = Target
+      this.$el.querySelector('input[type=file]').click()
+    }
+
   }
 </script>

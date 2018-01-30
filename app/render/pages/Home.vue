@@ -14,34 +14,36 @@
     <AlertMsg></AlertMsg>
   </div>
 </template>
-<script>
+<script lang="ts">
   import { remote } from 'electron'
-  import AlertMsg from '../components/AlertMsg'
+  import AlertMsg from '../components/AlertMsg.vue'
+  import Vue from 'vue'
+  import Component from 'vue-class-component'
 
   const Win = remote.getCurrentWindow()
-  export default {
-    components: {AlertMsg},
-    data () {
-      return {
-        IsMax: false
-      }
-    },
-    methods: {
-      WinClose () {
-        Win.close()
-      },
-      WinSmall () {
-        Win.minimize()
-      },
-      WinMax () {
-        if (this.IsMax) {
-          Win.unmaximize()
-        } else {
-          Win.maximize()
-        }
-      },
 
-    },
+  @Component({
+    components: {AlertMsg}
+  })
+  export default class Home extends Vue {
+    IsMax = false
+
+    WinClose () {
+      Win.close()
+    }
+
+    WinSmall () {
+      Win.minimize()
+    }
+
+    WinMax () {
+      if (this.IsMax) {
+        Win.unmaximize()
+      } else {
+        Win.maximize()
+      }
+    }
+
     mounted () {
       Win.on('maximize', () => {
         this.IsMax = true

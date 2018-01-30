@@ -1,5 +1,2 @@
-export default {
-  GetDataForTree(state){
-
-  }
-}
+export default {};
+//# sourceMappingURL=getters.js.map
