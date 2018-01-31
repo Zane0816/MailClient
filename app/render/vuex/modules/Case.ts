@@ -1,6 +1,6 @@
 import types from '../mutation-types'
 
-const state = {
+const state: any = {
   Cases: [{Id: 'test', Text: 'test', Children: [{Id: 'test1', Text: 'test001', Type: 'Evidence'}], Type: 'Case'}, {
     Id: 'test2',
     Text: 'test002',
@@ -21,29 +21,29 @@ const state = {
   CurrentCase: {Id: ''}
 }
 
-const getters = {
-  GetAllCase () {
+const getters: any = {
+  GetAllCase (): any {
     return state.Cases
   },
-  GetCurrentCase () {
+  GetCurrentCase (state: any): any {
     if (!state.CurrentCase.Id)
       state.CurrentCase = state.Cases[0]
     return state.CurrentCase
   }
 }
-const actions = {
-  AddCase ({commit}, Case: any) {
+const actions: any = {
+  AddCase (commit: any, Case: any): any {
     commit(types.Add_Case, Case)
   },
-  SetCurrentCase ({commit}, Case) {
+  SetCurrentCase (commit: any, Case: any): any {
     commit(types.Set_Current_Case, Case)
   }
 }
-const mutations = {
-  [types.Set_Current_Case] (state, Case) {
+const mutations: any = {
+  [types.Set_Current_Case] (state: any, Case: any): any {
     state.CurrentCase = Case
   },
-  [types.Add_Case] (state, Case) {
+  [types.Add_Case] (state: any, Case: any): any {
     state.Cases.push(Case)
   }
 }

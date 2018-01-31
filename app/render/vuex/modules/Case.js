@@ -23,19 +23,17 @@ var getters = {
     GetAllCase: function () {
         return state.Cases;
     },
-    GetCurrentCase: function () {
+    GetCurrentCase: function (state) {
         if (!state.CurrentCase.Id)
             state.CurrentCase = state.Cases[0];
         return state.CurrentCase;
     }
 };
 var actions = {
-    AddCase: function (_a, Case) {
-        var commit = _a.commit;
+    AddCase: function (commit, Case) {
         commit(types.Add_Case, Case);
     },
-    SetCurrentCase: function (_a, Case) {
-        var commit = _a.commit;
+    SetCurrentCase: function (commit, Case) {
         commit(types.Set_Current_Case, Case);
     }
 };

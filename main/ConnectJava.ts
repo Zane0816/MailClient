@@ -565,9 +565,8 @@ class Mark {
   /**
    * 删除网络标记
    * @param {Array}MarkName 标记名称
-   * @param {Function}CallBack 回调函数
    */
-  async DelNetMark (MarkName: Array<string>, CallBack: Function) {
+  async DelNetMark (MarkName: Array<string>) {
     await WaitingFuncAndDo('NetMarkTool', 'delMark', [JSON.stringify(MarkName)])
   }
 
@@ -644,9 +643,8 @@ class Search {
   /**
    * 添加已读文件
    * @param Id 邮件Id
-   * @param CallBack 回调函数
    */
-  async ReadFile (Id: string, CallBack: Function) {
+  async ReadFile (Id: string) {
     await WaitingFuncAndDo('SearchTool', 'readFile', [Id])
   }
 
@@ -670,9 +668,8 @@ class Search {
   /**
    * 获取搜索历史
    * @param {String} Type 类型
-   * @param {Function} CallBack 回调函数
    */
-  async GetHistory (Type: string, CallBack: Function) {
+  async GetHistory (Type: string) {
     await WaitingFuncAndDo('SearchTool', 'getHistory', [Type])
   }
 
@@ -1119,9 +1116,8 @@ class Class {
 
   /**
    * 获取所有日志
-   * @param {Function}CallBack 回调函数
    */
-  async GetAllLog (CallBack: string) {
+  async GetAllLog () {
     await  WaitingFuncAndDo('ClassTool', 'getAlllog')
   }
 
@@ -1136,9 +1132,8 @@ class Class {
   /**
    * 获取当前和子集部门
    * @param {String}ClassId 部门Id
-   * @param {Function}CallBack 回调函数
    */
-  async GetChildrenList (ClassId: string, CallBack: Function) {
+  async GetChildrenList (ClassId: string) {
     await WaitingFuncAndDo('ClassTool', 'getChildrenList', [ClassId])
   }
 }
@@ -1181,7 +1176,7 @@ function Init () {
 function CheckedJre () {
   LogHelper.writeInfo('Checking Jre')
 
-  let dll, dylib, so, soFiles, binary, home = __dirname,
+  let dll, dylib, so, binary, home = __dirname,
     jvmPathx86 = resolve(__dirname, '../jre/bin/client/jvm.dll'),
     jvmPathx64 = resolve(__dirname, '../jre/bin/server/jvm.dll')
   dll = existsSync(jvmPathx86) ? jvmPathx86 : jvmPathx64
@@ -1257,7 +1252,7 @@ function InitClass (Class: string) {
  * @param {Array=}Args 参数
  */
 async function WaitingFuncAndDo (ClassName: string, FuncName: string, Args?: Array<number | string | Function | boolean>) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     if (!JavaClass[ClassName]) if (!await InitClass(ClassName)) throw new Error(`类:${ClassName} 实例化失败`)
     if (!Args) Args = []
     Args[Args.length] = (err: string, Msg: any) => {
@@ -1294,6 +1289,8 @@ export default class {
   public Export: Export
   public Phone: Phone
   public Class: Class
+  public CheckTime: CheckTime
+  public RelationShip: RelationShip
 
   constructor () {
     CheckedJre()
@@ -1305,5 +1302,7 @@ export default class {
     this.Export = new Export()
     this.Phone = new Phone()
     this.Class = new Class()
+    this.CheckTime = new CheckTime()
+    this.RelationShip = new RelationShip()
   }
 }

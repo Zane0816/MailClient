@@ -32,19 +32,18 @@ let rendererConfig = {
         test: /\.ts$/,
         loader: 'ts-loader',
         exclude: /node_modules/,
-
-      },
-      {
-        test: /\.tsx?$/,
-        loader: 'ts-loader',
-        exclude: /node_modules/,
         options: {
           appendTsSuffixTo: [/\.vue$/]
         }
       },
+      // {
+      //   test: /\.tsx?$/,
+      //   loader: 'ts-loader',
+      //   exclude: /node_modules/
+      // },
       {
         test: /\.vue$/,
-        loader: 'Vue-loader',
+        loader: 'vue-loader',
         options: {
           loaders: {
             css: ExtractTextPlugin.extract({

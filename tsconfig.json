@@ -6,13 +6,21 @@
     "strict": true,
     "noImplicitThis": true,
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "lib": [
       "es5",
+      "es6",
       "dom",
       "es2015.promise"
     ]
   },
+  "include": [
+    "./app/**/*.ts",
+    "./main/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

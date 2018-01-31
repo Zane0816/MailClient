@@ -5,7 +5,7 @@
 import { dirname } from 'path'
 // import {EventEmitter} from 'events'
 import { exec } from 'child_process'
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import Common from './Common'
 import JavaMethod from './ConnectJava'
 // import AutoUpdate from './AutoUpdate'
@@ -32,7 +32,7 @@ const File = {
     let CMDStr = 'start "" "' + (InDir ? dirname(Path) : Path) + '"'
     LogHelper.writeInfo(CMDStr)
     if (Selected) CMDStr = 'explorer.exe /select,"' + Path + '"'
-    exec(CMDStr, (err, stdout, stderr) => {
+    exec(CMDStr, (err, stderr) => {
       if (err) LogHelper.writeErr(err)
       if (stderr) LogHelper.writeErr(stderr)
     })

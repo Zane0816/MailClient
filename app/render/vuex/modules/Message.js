@@ -27,8 +27,7 @@ var getters = {
     }
 };
 var actions = {
-    AddMessage: function (_a, Msg) {
-        var dispatch = _a.dispatch, commit = _a.commit;
+    AddMessage: function (dispatch, commit, Msg) {
         if (Msg.Message.length > 0) {
             Msg.Id = new Date().getTime(); //给消息生成一个Id
             setTimeout(function () {
@@ -37,14 +36,14 @@ var actions = {
             commit(types.Add_To_Messages, Msg);
         }
     },
-    RemoveMessage: function (_a, MsgId) {
-        var commit = _a.commit;
+    RemoveMessage: function (commit, MsgId) {
         var Index = 0;
         var Has = state.Messages.find(function (d, i) {
             if (d.Id === MsgId) {
                 Index = i;
                 return true;
             }
+            return false;
         });
         if (Has)
             commit(types.Remove_Messages_ById, Index);
